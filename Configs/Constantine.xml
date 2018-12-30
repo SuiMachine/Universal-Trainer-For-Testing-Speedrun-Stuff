@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>Constantine</ProcessName>
+	<Position>
+		<Pointer>0x005B9DF4, 0x16C, 0x160, 0x8128</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>25</MoveXYAmount>
+	<MoveZAmount>40</MoveZAmount>
+</Config>

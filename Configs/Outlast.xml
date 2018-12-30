@@ -1,0 +1,11 @@
+<Config x64="true">
+	<ProcessName>OLGame</ProcessName>
+	<Position>
+		<Pointer>0x003F295C, 0x24</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x003F295C, 0x18</SinAlpha>
+	<CosAlpha Inverted="True">0x003F295C, 0x20</CosAlpha>
+	<MoveXYAmount>1</MoveXYAmount>
+	<MoveZAmount>3</MoveZAmount>
+</Config>

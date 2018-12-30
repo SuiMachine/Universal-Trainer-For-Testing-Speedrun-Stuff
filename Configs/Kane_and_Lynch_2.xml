@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>kl2</ProcessName>
+	<Position>
+		<Pointer>0x0114D9E0, 0x10, 0x7EC, 0xA0</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0</SinAlpha>
+	<CosAlpha Inverted="False">0</CosAlpha>
+	<MoveXYAmount>1</MoveXYAmount>
+	<MoveZAmount>3</MoveZAmount>
+</Config>

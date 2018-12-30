@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>deadspace3</ProcessName>
+	<Position>
+		<Pointer>0x002E6B58, 0x6C, 0x30</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x002E6B58, 0x6C, 0x48</SinAlpha>
+	<CosAlpha Inverted="False">0x002E6B58, 0x6C, 0x40</CosAlpha>
+	<MoveXYAmount>150</MoveXYAmount>
+	<MoveZAmount>400</MoveZAmount>
+</Config>

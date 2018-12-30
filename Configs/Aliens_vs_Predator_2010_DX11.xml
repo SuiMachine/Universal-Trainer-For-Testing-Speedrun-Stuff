@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>AvP_DX11</ProcessName>
+	<Position>
+		<Pointer>0x00669648, 0x8, 0xC, 0x60</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>10</MoveXYAmount>
+	<MoveZAmount>10</MoveZAmount>
+</Config>

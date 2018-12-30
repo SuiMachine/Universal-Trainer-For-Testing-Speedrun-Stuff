@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>ACM</ProcessName>
+	<Position>
+		<Pointer>0x01DAB36C, 0x0, 0x28, 0x238, 0x5c</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>150</MoveXYAmount>
+	<MoveZAmount>200</MoveZAmount>
+</Config>
