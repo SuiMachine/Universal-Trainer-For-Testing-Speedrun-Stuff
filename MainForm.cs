@@ -74,7 +74,7 @@ namespace Flying47
             {
                 if (ConfigLoader.LoadFullConfig(out processName, out positionAddress, out adrSinAlpha, out isSinInverted, out adrCosAlpha, out isCosInverted, out moveAmountXYAxis, out moveAmountZAxis))
                 {
-                    if(adrSinAlpha.IsNull() || adrCosAlpha.IsNull())
+                    if (adrSinAlpha.IsNull() || adrCosAlpha.IsNull())
                     {
                         AnglesEnabled = false;
                         kForward = Keys.None;
@@ -97,6 +97,8 @@ namespace Flying47
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
                 }
+                else
+                    Application.Exit();
             }
             catch(Exception exc)
             {

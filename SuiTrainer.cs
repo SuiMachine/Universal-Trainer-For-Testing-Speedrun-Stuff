@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 
 namespace MemoryReads64
 {
-    public struct Pointer
+    public class Pointer
     {
         public Int64 baseaddress { get; private set; }
         public Int64[] offsets { get; private set; }

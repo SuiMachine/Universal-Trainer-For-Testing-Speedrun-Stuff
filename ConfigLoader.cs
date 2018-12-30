@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using System.Xml;
+using System.Windows.Forms;
 #if BUILD64
 using MemoryReads64;
 using UniversalInt = System.Int64;
@@ -22,13 +23,33 @@ namespace Flying47
         const bool Is64BitVersion = false;
 #endif
 
-        const string XML_FILE_NAME = "universal_trainer_for_testing.xml";
-
         public static bool LoadFullConfig(out string ProcessName, out PositionSet positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
         {
-            if(!File.Exists(XML_FILE_NAME))
+            string XML_FILE_NAME = "universal_trainer_for_testing.xml";
+
+            if (!File.Exists(XML_FILE_NAME))
             {
-                throw new FileNotFoundException(XML_FILE_NAME + " was not found in a folder with the program. Program will now close.");
+                OpenFileDialog fd = new OpenFileDialog
+                {
+                    Filter = "*.xml|*.xml",
+                    Multiselect = false,
+                    InitialDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Configs")
+                };
+                DialogResult result = fd.ShowDialog();
+                if (result == DialogResult.OK)
+                    XML_FILE_NAME = fd.FileName;
+                else
+                {
+                    ProcessName = "";
+                    positionSet = new PositionSet();
+                    sinAlpha = null;
+                    sinInverted = false;
+                    cosAlpha = null;
+                    cosInverted = false;
+                    MoveXYAmount = 1;
+                    MoveZAmount = 1;
+                    return false;
+                }
             }
 
             XmlDocument doc = new XmlDocument();
