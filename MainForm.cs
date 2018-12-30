@@ -58,6 +58,8 @@ namespace Flying47
         Bitmap bitmap;
         Graphics gBuffer;
 
+        Gma.System.MouseKeyHook.IKeyboardEvents m_GlobalHook;
+
 
         /*------------------
         -- INITIALIZATION --
@@ -81,7 +83,6 @@ namespace Flying47
                         B_KeyForward.Enabled = false;
                     }
 
-                    InitHotkey();
                     TTimer.Start();
 
                     B_KeyForward.Text = kForward.ToString();
@@ -96,6 +97,8 @@ namespace Flying47
 
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
+                    m_GlobalHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
+                    m_GlobalHook.KeyDown += M_GlobalHook_KeyDown;
                 }
                 else
                     Application.Exit();
@@ -167,7 +170,6 @@ namespace Flying47
                         vectorDisplay.Image = bitmap;
                     }
 
-                    InitHotkey();
                     TTimer.Interval = 100;
                 }
                 else
@@ -201,75 +203,29 @@ namespace Flying47
             L_Z.Text = "NaN";
         }
 
-        public void InitHotkey()
+        private void M_GlobalHook_KeyDown(object sender, KeyEventArgs e)
         {
-            if (!KeyGrabber.Hooked)
-            {
-                KeyGrabber.key.Clear();
-                KeyGrabber.keyPressEvent += KeyGrabber_KeyPress;
-                if (kStorePosition != Keys.None)
-                    KeyGrabber.key.Add(kStorePosition);
+            var hotkey = e.KeyCode;
 
-                if (kLoadPosition != Keys.None)
-                    KeyGrabber.key.Add(kLoadPosition);
-
-                if (kDown != Keys.None)
-                    KeyGrabber.key.Add(kDown);
-
-                if (kUp != Keys.None)
-                    KeyGrabber.key.Add(kUp);
-
-                if (kForward != Keys.None)
-                    KeyGrabber.key.Add(kForward);
-
-                KeyGrabber.SetHook();
-            }
-            else
-            {
-                if (kStorePosition != Keys.None || kLoadPosition != Keys.None || kDown != Keys.None || kUp != Keys.None || kForward != Keys.None )
-                {
-                    KeyGrabber.key.Clear();
-                    KeyGrabber.key.Add(kStorePosition);
-                    KeyGrabber.key.Add(kLoadPosition);
-                    KeyGrabber.key.Add(kDown);
-                    KeyGrabber.key.Add(kUp);
-                    KeyGrabber.key.Add(kForward);
-                }
-            }
-        }
-
-        public void UnHook()
-        {
-            if(KeyGrabber.Hooked)
-            {
-                KeyGrabber.keyPressEvent -= KeyGrabber_KeyPress;
-                KeyGrabber.UnHook();
-            }
-
-        }
-
-
-        private void KeyGrabber_KeyPress(object sender, EventArgs e)
-        {
-            if (((Keys)sender) == kStorePosition)
+            if (hotkey == kStorePosition)
             {
                 Save_Position();
             }
-            else if(((Keys)sender)== kLoadPosition)
+            else if (hotkey == kLoadPosition)
             {
                 Load_Position();
             }
 
-            if (((Keys)sender) == kUp)
+            if (hotkey == kUp)
             {
                 SendMeUp();
             }
-            else if (((Keys)sender) == kDown)
+            else if (hotkey == kDown)
             {
                 SendMeDown();
             }
 
-            if (((Keys)sender) == kForward)
+            if (hotkey == kForward)
             {
                 SendMeForward();
             }
@@ -305,51 +261,10 @@ namespace Flying47
             storedCoordZ = readCoordZ;
         }
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (settingInputKey)
-            {
-                if (CurrentKeyChange == (uint)KeysUsed.storePosition)
-                {
-                    kStorePosition = keyData;
-                    B_StorePosition.Text = kStorePosition.ToString();
-                    B_StorePosition.Checked = false;
-                }
-                else if (CurrentKeyChange == (uint)KeysUsed.loadPosition)
-                {
-                    kLoadPosition = keyData;
-                    B_LoadPosition.Text = kLoadPosition.ToString();
-                    B_LoadPosition.Checked = false;
-                }
-                else if (CurrentKeyChange == (uint)KeysUsed.forward)
-                {
-                    kForward = keyData;
-                    B_KeyForward.Text = kForward.ToString();
-                    B_KeyForward.Checked = false;
-                }
-                else if (CurrentKeyChange == (uint)KeysUsed.up)
-                {
-                    kUp = keyData;
-                    B_KeyUp.Text = kUp.ToString();
-                    B_KeyUp.Checked = false;
-                }
-                else if (CurrentKeyChange == (uint)KeysUsed.down)
-                {
-                    kDown = keyData;
-                    B_KeyDown.Text = kDown.ToString();
-                    B_KeyDown.Checked = false;
-                }
-
-                InitHotkey();
-                return true;
-            }
-                
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            UnHook();
+            m_GlobalHook.KeyDown -= M_GlobalHook_KeyDown;
         }
 
         private void B_ChangeButton(object sender, EventArgs e)
