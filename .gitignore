@@ -50,3 +50,5 @@ bin/
 *.vspx
 *.psess
 *.rar
+
+.vs/*
