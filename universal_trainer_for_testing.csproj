@@ -166,6 +166,7 @@
 if $(PlatformName)==x64 (
 cp $(TargetPath) $(SolutionDir)\Release\$(TargetName)_x64.exe) else (
 cp $(TargetPath) $(SolutionDir)\Release\$(TargetName).exe)
+cp $(TargetDir)\Gma.System.MouseKeyHook.dll $(SolutionDir)\Release)
 )</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

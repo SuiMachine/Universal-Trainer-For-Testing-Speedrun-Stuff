@@ -52,7 +52,7 @@ namespace Flying47
         Keys kDown = Keys.Subtract;
         Keys kForward = Keys.NumPad8;
 
-        uint CurrentKeyChange;
+        string CurrentKeyChange;
         bool settingInputKey = false;
 
         Bitmap bitmap;
@@ -106,7 +106,7 @@ namespace Flying47
             catch(Exception exc)
             {
                 MessageBox.Show(exc.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                Close();
+                Application.Exit();
             }
         }
 
@@ -206,28 +206,62 @@ namespace Flying47
         private void M_GlobalHook_KeyDown(object sender, KeyEventArgs e)
         {
             var hotkey = e.KeyCode;
+            if (hotkey == Keys.None)
+                return;
 
-            if (hotkey == kStorePosition)
+            if (!settingInputKey)
             {
-                Save_Position();
-            }
-            else if (hotkey == kLoadPosition)
-            {
-                Load_Position();
-            }
+                if (hotkey == kStorePosition)
+                {
+                    Save_Position();
+                }
+                else if (hotkey == kLoadPosition)
+                {
+                    Load_Position();
+                }
 
-            if (hotkey == kUp)
-            {
-                SendMeUp();
-            }
-            else if (hotkey == kDown)
-            {
-                SendMeDown();
-            }
+                if (hotkey == kUp)
+                {
+                    SendMeUp();
+                }
+                else if (hotkey == kDown)
+                {
+                    SendMeDown();
+                }
 
-            if (hotkey == kForward)
+                if (hotkey == kForward)
+                {
+                    SendMeForward();
+                }
+            }
+            else
             {
-                SendMeForward();
+                if (hotkey == Keys.Escape)
+                    hotkey = Keys.None;
+                switch (CurrentKeyChange)
+                {
+                    case "B_KeyUp":
+                        kUp = hotkey;
+                        B_KeyUp.Text = kUp.ToString();
+                        break;
+                    case "B_KeyDown":
+                        kDown = hotkey;
+                        B_KeyDown.Text = kDown.ToString();
+                        break;
+                    case "B_KeyForward":
+                        kForward = hotkey;
+                        B_KeyForward.Text = kForward.ToString();
+                        break;
+                    case "B_StorePosition":
+                        kStorePosition = hotkey;
+                        B_StorePosition.Text = kStorePosition.ToString();
+                        break;
+                    case "B_LoadPosition":
+                        kLoadPosition = hotkey;
+                        B_LoadPosition.Text = kLoadPosition.ToString();
+                        break;
+                }
+                settingInputKey = false;
             }
         }
 
@@ -264,7 +298,8 @@ namespace Flying47
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            m_GlobalHook.KeyDown -= M_GlobalHook_KeyDown;
+            if (m_GlobalHook != null)
+                m_GlobalHook.KeyDown -= M_GlobalHook_KeyDown;
         }
 
         private void B_ChangeButton(object sender, EventArgs e)
@@ -272,30 +307,26 @@ namespace Flying47
             if (((CheckBox)sender).Checked)
             {
                 settingInputKey = true;
+                CurrentKeyChange = ((CheckBox)sender).Name;
                 if(sender == B_StorePosition)
                 {
                     B_StorePosition.Text = "";
-                    CurrentKeyChange = (uint)KeysUsed.storePosition;
                 }
                 else if (sender == B_LoadPosition)
                 {
                     B_LoadPosition.Text = "";
-                    CurrentKeyChange = (uint)KeysUsed.loadPosition;
                 }
                 else if (sender == B_KeyForward)
                 {
                     B_KeyForward.Text = "";
-                    CurrentKeyChange = (uint)KeysUsed.forward;
                 }
                 else if (sender == B_KeyUp)
                 {
                     B_KeyUp.Text = "";
-                    CurrentKeyChange = (uint)KeysUsed.up;
                 }
                 else if (sender == B_KeyDown)
                 {
                     B_KeyDown.Text = "";
-                    CurrentKeyChange = (uint)KeysUsed.down;
                 }
             }
             else

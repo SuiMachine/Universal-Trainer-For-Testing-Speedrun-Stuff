@@ -58,6 +58,8 @@ namespace Flying47
             bool Requires64Bit = bool.Parse(rootNode.Attributes["x64"].InnerText);
             if (!Is64BitVersion && Requires64Bit)
                 throw new Exception("Following config requires 64bit executable!");
+            else if(Is64BitVersion && !Requires64Bit)
+                throw new Exception("Following config requires 32bit executable!");
 
             ProcessName = rootNode["ProcessName"].InnerText;
             positionSet = rootNode["Position"].ToPositionSet();
