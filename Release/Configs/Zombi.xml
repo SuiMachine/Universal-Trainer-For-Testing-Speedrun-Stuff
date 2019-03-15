@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>Zombi</ProcessName>
+	<Position>
+		<Pointer>0x00855364, 0x4, 0x74, 0x80</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x00855364, 0x4, 0x74, 0x10</SinAlpha>
+	<CosAlpha Inverted="False">0x00855364, 0x4, 0x74, 0x14</CosAlpha>
+	<MoveXYAmount>3</MoveXYAmount>
+	<MoveZAmount>5</MoveZAmount>
+</Config>
