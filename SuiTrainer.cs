@@ -534,6 +534,11 @@ namespace MemoryReads
         {
             X = position;
             var offsets = position.offsets;
+
+            if(offsets.Length == 0)
+            {
+
+            }
             if (!isXZY)
             {
                 var copy1 = (int[])offsets.Clone();

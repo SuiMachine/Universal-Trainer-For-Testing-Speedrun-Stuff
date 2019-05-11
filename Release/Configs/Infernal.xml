@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>game</ProcessName>
+	<Position>
+		<Pointer>0x76ABDC</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False"></SinAlpha>
+	<CosAlpha Inverted="False"></CosAlpha>
+	<MoveXYAmount>0</MoveXYAmount>
+	<MoveZAmount>0</MoveZAmount>
+</Config>
