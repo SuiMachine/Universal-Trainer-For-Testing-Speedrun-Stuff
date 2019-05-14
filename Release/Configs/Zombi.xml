@@ -1,4 +1,4 @@
-<Config x64="false">
+<Config>
 	<ProcessName>Zombi</ProcessName>
 	<Position>
 		<Pointer>0x00855364, 0x4, 0x74, 0x80</Pointer>

@@ -1,4 +1,4 @@
-<Config x64="false">
+<Config>
 	<ProcessName>Constantine</ProcessName>
 	<Position>
 		<Pointer>0x005B9DF4, 0x16C, 0x160, 0x8128</Pointer>

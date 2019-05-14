@@ -1,4 +1,4 @@
-<Config x64="false">
+<Config>
 	<ProcessName>deadspace3</ProcessName>
 	<Position>
 		<Pointer>0x00E10060, 0x380, 0xB0</Pointer>

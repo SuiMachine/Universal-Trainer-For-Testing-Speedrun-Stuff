@@ -3,69 +3,154 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Linq;
+using System.ComponentModel;
 
 namespace MemoryReads64
 {
+    /// <summary>
+    /// Pointer class used for reading from memory.
+    /// </summary>
     public class Pointer
     {
-        public Int64 baseaddress { get; private set; }
-        public Int64[] offsets { get; private set; }
+        /// <summary>
+        /// Base adress of a module (gets set when using trainer class read or write).
+        /// </summary>
+        public Int64 BaseModuleAddress { get; internal set; }
+        /// <summary>
+        /// Name of a module from which to get the address
+        /// </summary>
+        public string BaseModuleName { get; private set; }
+        /// <summary>
+        /// First offset (this gets added to base module adress
+        /// </summary>
+        public Int64 BaseOffset { get; private set; }
+        /// <summary>
+        /// Array of further offset.
+        /// </summary>
+        public int[] Offsets { get; private set; }
+        /// <summary>
+        /// Bool saying whatever it's absolute address or not
+        /// </summary>
+        public bool IsDirectPointer { get; private set; }
+        /// <summary>
+        /// Bool saying whatever the process is 64bit or not. This gets together with base module adress (and it has to be set correctly, in order for trainer class to treverse pointer offsets correctly).
+        /// </summary>
+        public bool IsPtrFor64BitProcess { get; internal set; }
 
-        public Pointer(Int64 baseaddress, Int64[] offsets)
+        /// <summary>
+        /// Constructor for pointer class.
+        /// </summary>
+        /// <param name="baseModuleName">Base module name (leave as string empty to use main process' main module).</param>
+        /// <param name="baseOffset">First offset.</param>
+        /// <param name="offsets">Further offsets.</param>
+        public Pointer(string baseModuleName, Int64 baseOffset, int[] offsets)
         {
-            this.baseaddress = baseaddress;
-            this.offsets = offsets;
+            this.BaseModuleName = baseModuleName.ToLower();
+            this.BaseOffset = baseOffset;
+            this.Offsets = offsets;
+            this.IsDirectPointer = offsets.Length == 0;
         }
 
+        /// <summary>
+        /// Simplified constructor for used when no angles are provided in config file.
+        /// </summary>
+        /// <param name="baseaddress"></param>
         public Pointer(Int64 baseaddress)
         {
-            this.baseaddress = baseaddress;
-            offsets = new Int64[0];
+            this.BaseOffset = baseaddress;
+            Offsets = new int[0];
+            this.IsDirectPointer = false;
         }
 
+        /// <summary>
+        /// Tells whatever the base address is null or not.
+        /// </summary>
+        /// <returns>Bool value.</returns>
         internal bool IsNull()
         {
-            return baseaddress == 0;
+            return BaseOffset == 0;
         }
     }
 
+    /// <summary>
+    /// A set of 3 pointers describing position in 3d game (all of the reasonably written 3d games have them clamped together).
+    /// </summary>
     public struct PositionSet
     {
+        /// <summary>
+        /// Pointer for a point describing position on X axis.
+        /// </summary>
         public Pointer X { get; private set; }
+        /// <summary>
+        /// Pointer for a point describing position on Y axis.
+        /// </summary>
         public Pointer Y { get; private set; }
+        /// <summary>
+        /// Pointer for a point describing position on Z axis.
+        /// </summary>
         public Pointer Z { get; private set; }
 
+        /// <summary>
+        /// Constructor for a struct, that creates 2 further pointers after providing it pointer to X axis.
+        /// </summary>
+        /// <param name="position">Pointer to X axis.</param>
+        /// <param name="isXZY">Bool value of whatever the coordinates are stored as XZY, where Z is height.</param>
         public PositionSet(Pointer position, bool isXZY = false)
         {
             X = position;
-            var offsets = position.offsets;
-            if(!isXZY)
-            {
-                var copy1 = (long[])offsets.Clone();
-                copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
-                var copy2 = (long[])copy1.Clone();
-                copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
+            var offsets = position.Offsets;
 
-                Y = new Pointer(position.baseaddress, copy1);
-                Z = new Pointer(position.baseaddress, copy2);
+            if(offsets.Length == 0)
+            {
+                if (!isXZY)
+                {
+                    Y = new Pointer(position.BaseModuleName, position.BaseOffset + 0x4, new int[0]);
+                    Z = new Pointer(position.BaseModuleName, position.BaseOffset + 0x8, new int[0]);
+                }
+                else
+                {
+                    Y = new Pointer(position.BaseModuleName, position.BaseOffset + 0x8, new int[0]);
+                    Z = new Pointer(position.BaseModuleName, position.BaseOffset + 0x4, new int[0]);
+                }
             }
             else
             {
-                var copy1 = (long[])offsets.Clone();
-                copy1[copy1.Length - 1] = copy1[copy1.Length-1] + 0x4;
-                var copy2 = (long[])copy1.Clone();
-                copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
+                if (!isXZY)
+                {
+                    var copy1 = (int[])offsets.Clone();
+                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
+                    var copy2 = (int[])copy1.Clone();
+                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
 
-                Z = new Pointer(position.baseaddress, copy1);
-                Y = new Pointer(position.baseaddress, copy2);
+                    Y = new Pointer(position.BaseModuleName, position.BaseOffset, copy1);
+                    Z = new Pointer(position.BaseModuleName, position.BaseOffset, copy2);
+                }
+                else
+                {
+                    var copy1 = (int[])offsets.Clone();
+                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
+                    var copy2 = (int[])copy1.Clone();
+                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
+
+                    Z = new Pointer(position.BaseModuleName, position.BaseOffset, copy1);
+                    Y = new Pointer(position.BaseModuleName, position.BaseOffset, copy2);
+                }
             }
         }
 
-        public void ReadSet(Process[] proc, long baseAddress, out float valX, out float valY, out float valZ)
+        /// <summary>
+        /// Reads entire set of pointers describing position in 3D space.
+        /// </summary>
+        /// <param name="proc">Process from which to read.</param>
+        /// <param name="valX">Outputed float value for X axis.</param>
+        /// <param name="valY">Outputed float value for Y axis.</param>
+        /// <param name="valZ">Outputed float value for Z (height) axis.</param>
+        public void ReadSet(Process proc, out float valX, out float valY, out float valZ)
         {
-            valX = Trainer.ReadPointerFloat(proc, baseAddress + X.baseaddress, X.offsets);
-            valY = Trainer.ReadPointerFloat(proc, baseAddress + Y.baseaddress, Y.offsets);
-            valZ = Trainer.ReadPointerFloat(proc, baseAddress + Z.baseaddress, Z.offsets);
+            valX = Trainer.ReadPointerFloat(proc, X);
+            valY = Trainer.ReadPointerFloat(proc, Y);
+            valZ = Trainer.ReadPointerFloat(proc, Z);
         }
     }
 
@@ -97,901 +182,535 @@ namespace MemoryReads64
         [DllImport("kernel32")]
         private static extern int CloseHandle(int Handle);
 
-
-
-        public static byte ReadByte(Process[] Proc, Int64 Address)
+        /// <summary>
+        /// Gets a base address for a module in a pointer and sets it in pointer struct
+        /// </summary>
+        /// <param name="Proc">Proces for which to get the base address.</param>
+        /// <param name="pointerInstance">Pointer object for which to get address (module name is specified inside of pointer struct).</param>
+        private static void GetModuleBaseAddress(Process Proc, Pointer pointerInstance)
         {
-            byte Value = 0;
-            checked
+            pointerInstance.IsPtrFor64BitProcess = Proc.IsProcess64Bit();
+
+            if (pointerInstance.BaseModuleName != String.Empty)
             {
-                try
+                if (pointerInstance.IsPtrFor64BitProcess)
                 {
-                    if (Proc.Length != 0)
+                    var modules = Proc.Modules;
+                    foreach (ProcessModule module in modules)
                     {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
+                        if (module.ModuleName.ToLower() == pointerInstance.BaseModuleName)
                         {
-                            ReadProcessMemoryByte(Handle, Address, ref Value, 1, ref Bytes);
-                            CloseHandle(Handle);
+                            pointerInstance.BaseModuleAddress = module.BaseAddress.ToInt64();
+                            Debug.WriteLine("Address for manually specified module is: 0x" + pointerInstance.BaseModuleAddress.ToString("X8"));
                         }
                     }
                 }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static int ReadInteger(Process[] Proc, Int64 Address)
-        {
-            int Value = 0;
-            checked
-            {
-                try
+                else
                 {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryInteger(Handle, Address, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
+                    //Getting a mo
+                    pointerInstance.BaseModuleAddress = (Int64)Proc.GetWow64ModuleBase(pointerInstance.BaseModuleName);
                 }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static float ReadFloat(Process[] Proc, Int64 Address)
-        {
-            float Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryFloat((int)Handle, Address, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static double ReadDouble(Process[] Proc, Int64 Address)
-        {
-            double Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryDouble((int)Handle, Address, ref Value, 8, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-
-        public static byte ReadPointerByte(Process[] Proc, Int64 Pointer, Int64[] Offset)
-        {
-            byte Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryByte((int)Handle, Pointer, ref Value, 2, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static int ReadPointerInteger(Process[] Proc, Int64 Pointer, Int64[] Offset)
-        {
-            int Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryInteger((int)Handle, Pointer, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-
-        public static float ReadPointerFloat(Process[] Proc, Int64 Pointer, Int64[] Offset)
-        {
-            float Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryFloat((int)Handle, Pointer, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static double ReadPointerDouble(Process[] Proc, Int64 Pointer, Int64[] Offset)
-        {
-            double Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryDouble((int)Handle, Pointer, ref Value, 8, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-
-        public static void WriteByte(Process[] Proc, Int64 Address, byte Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryByte(Handle, Address, ref Value, 1, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteInteger(Process[] Proc, Int64 Address, int Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryInteger(Handle, Address, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteFloat(Process[] Proc, Int64 Address, float Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryFloat(Handle, Address, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteDouble(Process[] Proc, Int64 Address, double Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        Int64 Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryDouble(Handle, Address, ref Value, 8, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-
-        public static void WritePointerByte(Process[] Proc, Int64 Pointer, Int64[] Offset, byte Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            Int64 Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64(Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryByte(Handle, Pointer, ref Value, 2, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WritePointerInteger(Process[] Proc, Int64 Pointer, Int64[] Offset, int Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            Int64 Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64(Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryInteger(Handle, Pointer, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WritePointerFloat(Process[] Proc, Int64 Pointer, Int64[] Offset, float Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            Int64 Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64(Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryFloat(Handle, Pointer, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WritePointerDouble(Process[] Proc, Int64 Pointer, Int64[] Offset, double Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            Int64 Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger64(Handle, Pointer, ref Pointer, 8, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryDouble(Handle, Pointer, ref Value, 8, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-    }
-}
-
-namespace MemoryReads
-{
-    public class Pointer
-    {
-        public int baseaddress { get; private set; }
-        public int[] offsets { get; private set; }
-
-        public Pointer(int baseaddress, int[] offsets)
-        {
-            this.baseaddress = baseaddress;
-            this.offsets = offsets;
-        }
-
-        public Pointer(int baseaddress)
-        {
-            this.baseaddress = baseaddress;
-            offsets = new int[0];
-        }
-
-        internal bool IsNull()
-        {
-            return baseaddress == 0;
-        }
-    }
-
-    public struct PositionSet
-    {
-        public Pointer X { get; private set; }
-        public Pointer Y { get; private set; }
-        public Pointer Z { get; private set; }
-
-        public PositionSet(Pointer position, bool isXZY = false)
-        {
-            X = position;
-            var offsets = position.offsets;
-
-            if(offsets.Length == 0)
-            {
-
-            }
-            if (!isXZY)
-            {
-                var copy1 = (int[])offsets.Clone();
-                copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
-                var copy2 = (int[])copy1.Clone();
-                copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
-
-                Y = new Pointer(position.baseaddress, copy1);
-                Z = new Pointer(position.baseaddress, copy2);
             }
             else
             {
-                var copy1 = (int[])offsets.Clone();
-                copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
-                var copy2 = (int[])copy1.Clone();
-                copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
-
-                Z = new Pointer(position.baseaddress, copy1);
-                Y = new Pointer(position.baseaddress, copy2);
+                pointerInstance.BaseModuleAddress = Proc.MainModule.BaseAddress.ToInt64();
             }
         }
 
-        public void ReadSet(Process[] proc, int baseAddress, out float valX, out float valY, out float valZ)
+        /// <summary>
+        /// Reads a byte from external process memory.
+        /// </summary>
+        /// <param name="Proc">Process for which to read.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <returns>Byte read from memory or 0 (on error).</returns>
+        public static byte ReadPointerByte(Process Proc, Pointer pointerInstance)
         {
-            valX = Trainer.ReadPointerFloat(proc, baseAddress + X.baseaddress, X.offsets);
-            valY = Trainer.ReadPointerFloat(proc, baseAddress + Y.baseaddress, Y.offsets);
-            valZ = Trainer.ReadPointerFloat(proc, baseAddress + Z.baseaddress, Z.offsets);
+            byte Value = 0;
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    ReadProcessMemoryByte((int)Handle, Pointer, ref Value, 1, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (long i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    ReadProcessMemoryByte((int)Handle, Pointer, ref Value, 1, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+            return Value;
+        }
+
+        /// <summary>
+        /// Reads an integer from external process memory.
+        /// </summary>
+        /// <param name="Proc">Process for which to read.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <returns>Integer read from memory or 0 (on error).</returns>
+        public static int ReadPointerInteger(Process Proc, Pointer pointerInstance)
+        {
+            int Value = 0;
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    ReadProcessMemoryInteger((int)Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (long i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    ReadProcessMemoryInteger((int)Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+            return Value;
+        }
+
+        /// <summary>
+        /// Reads a float from external process memory.
+        /// </summary>
+        /// <param name="Proc">Process for which to read.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <returns>Float read from memory or 0.0f (on error).</returns>
+        public static float ReadPointerFloat(Process Proc, Pointer pointerInstance)
+        {
+            float Value = 0;
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    ReadProcessMemoryFloat((int)Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    ReadProcessMemoryFloat((int)Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+            return Value;
+        }
+
+        /// <summary>
+        /// Reads a double from external process memory.
+        /// </summary>
+        /// <param name="Proc">Process for which to read.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <returns>Double read from memory or 0.0d (on error).</returns>
+        public static double ReadPointerDouble(Process Proc, Pointer pointerInstance)
+        {
+            double Value = 0;
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    ReadProcessMemoryDouble((int)Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    ReadProcessMemoryDouble((int)Handle, Pointer, ref Value, 8, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+            return Value;
+        }
+
+        /// <summary>
+        /// Write a byte to external process memory.
+        /// </summary>
+        /// <param name="Proc">Process to which to write.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <param name="Value">Value to write to memory.</param>
+        public static void WritePointerByte(Process Proc, Pointer pointerInstance, byte Value)
+        {
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    WriteProcessMemoryByte(Handle, Pointer, ref Value, 1, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    WriteProcessMemoryByte(Handle, Pointer, ref Value, 1, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+        }
+
+        /// <summary>
+        /// Write an integer to external process memory.
+        /// </summary>
+        /// <param name="Proc">Process to which to write.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <param name="Value">Value to write to memory.</param>
+        public static void WritePointerInteger(Process Proc, Pointer pointerInstance, int Value)
+        {
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    WriteProcessMemoryInteger(Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    WriteProcessMemoryInteger(Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+        }
+
+        /// <summary>
+        /// Write a float to external process memory.
+        /// </summary>
+        /// <param name="Proc">Process to which to write.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <param name="Value">Value to write to memory.</param>
+        public static void WritePointerFloat(Process Proc, Pointer pointerInstance, float Value)
+        {
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    WriteProcessMemoryFloat(Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    WriteProcessMemoryFloat(Handle, Pointer, ref Value, 4, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
+        }
+
+        /// <summary>
+        /// Write a double to external process memory.
+        /// </summary>
+        /// <param name="Proc">Process to which to write.</param>
+        /// <param name="pointerInstance">Pointer object containing adresses and offsets.</param>
+        /// <param name="Value">Value to write to memory.</param>
+        public static void WritePointerDouble(Process Proc, Pointer pointerInstance, double Value)
+        {
+            checked
+            {
+                try
+                {
+                    if (Proc != null)
+                    {
+                        if (pointerInstance.BaseModuleAddress != 0x0)
+                        {
+                            Int64 Bytes = 0;
+                            int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc.Id);
+                            Int64 Pointer = pointerInstance.BaseModuleAddress + pointerInstance.BaseOffset;
+
+                            if (Handle != 0)
+                            {
+                                if (pointerInstance.IsDirectPointer)
+                                {
+                                    WriteProcessMemoryDouble(Handle, Pointer, ref Value, 8, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                                else
+                                {
+                                    foreach (int i in pointerInstance.Offsets)
+                                    {
+                                        ReadProcessMemoryInteger64((int)Handle, Pointer, ref Pointer, pointerInstance.IsPtrFor64BitProcess ? 8 : 4, ref Bytes);
+                                        Pointer += i;
+                                    }
+                                    WriteProcessMemoryDouble(Handle, Pointer, ref Value, 8, ref Bytes);
+                                    CloseHandle(Handle);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            GetModuleBaseAddress(Proc, pointerInstance);
+                        }
+                    }
+                }
+                catch
+                { }
+            }
         }
     }
 
-    public class Trainer
+    /// <summary>
+    /// Extension methods for a process.
+    /// </summary>
+    public static class ProcessExtansions
     {
-        private const int PROCESS_ALL_ACCESS = 0x1F0FFF;
-        [DllImport("kernel32")]
-        private static extern int OpenProcess(int AccessType, int InheritHandle, int ProcessId);
-        [DllImport("kernel32", EntryPoint = "WriteProcessMemory")]
-        private static extern byte WriteProcessMemoryByte(int Handle, int Address, ref byte Value, int Size, ref int BytesWritten);
-        [DllImport("kernel32", EntryPoint = "WriteProcessMemory")]
-        private static extern int WriteProcessMemoryInteger(int Handle, int Address, ref int Value, int Size, ref int BytesWritten);
-        [DllImport("kernel32", EntryPoint = "WriteProcessMemory")]
-        private static extern float WriteProcessMemoryFloat(int Handle, int Address, ref float Value, int Size, ref int BytesWritten);
-        [DllImport("kernel32", EntryPoint = "WriteProcessMemory")]
-        private static extern double WriteProcessMemoryDouble(int Handle, int Address, ref double Value, int Size, ref int BytesWritten);
+        [DllImport("kernel32.dll", SetLastError = true, CallingConvention = CallingConvention.Winapi)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWow64Process([In] IntPtr process, [Out] out bool wow64Process);
+
+        /// <summary>
+        /// Checks whatever process is 64bit or not.
+        /// </summary>
+        /// <param name="proc">Process which to check.</param>
+        /// <returns>Bool value (true if 64bit, false if 32bit)</returns>
+        public static bool IsProcess64Bit(this Process proc)
+        {
+            if (IsWow64Process(proc.Handle, out bool retValue))
+                return !retValue;
+            else
+                throw new Exception("Failed to check whatever process is 64bit!");
+        }
+        
 
 
-        [DllImport("kernel32", EntryPoint = "ReadProcessMemory")]
-        private static extern byte ReadProcessMemoryByte(int Handle, int Address, ref byte Value, int Size, ref int BytesRead);
-        [DllImport("kernel32", EntryPoint = "ReadProcessMemory")]
-        private static extern int ReadProcessMemoryInteger(int Handle, int Address, ref int Value, int Size, ref int BytesRead);
-        [DllImport("kernel32", EntryPoint = "ReadProcessMemory")]
-        private static extern float ReadProcessMemoryFloat(int Handle, int Address, ref float Value, int Size, ref int BytesRead);
-        [DllImport("kernel32", EntryPoint = "ReadProcessMemory")]
-        private static extern double ReadProcessMemoryDouble(int Handle, int Address, ref double Value, int Size, ref int BytesRead);
-        [DllImport("kernel32")]
-        private static extern int CloseHandle(int Handle);
+        [DllImport("psapi.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnumProcessModulesEx(IntPtr hProcess, [Out] IntPtr[] lphModule, uint cb,
+            out uint lpcbNeeded, uint dwFilterFlag);
 
+        [DllImport("psapi.dll")]
+        private static extern uint GetModuleBaseName(IntPtr hProcess, IntPtr hModule, [Out] StringBuilder lpBaseName,
+            uint nSize);
 
+        [DllImport("psapi.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, [Out] out MODULEINFO lpmodinfo,
+          uint cb);
 
-        public static byte ReadByte(Process[] Proc, int Address)
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MODULEINFO
         {
-            byte Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryByte(Handle, Address, ref Value, 1, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static int ReadInteger(Process[] Proc, int Address)
-        {
-            int Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryInteger(Handle, Address, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static float ReadFloat(Process[] Proc, int Address)
-        {
-            float Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryFloat((int)Handle, Address, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static double ReadDouble(Process[] Proc, int Address)
-        {
-            double Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            ReadProcessMemoryDouble((int)Handle, Address, ref Value, 8, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
+            public IntPtr lpBaseOfDll;
+            public uint SizeOfImage;
+            public IntPtr EntryPoint;
         }
 
-        public static byte ReadPointerByte(Process[] Proc, int Pointer, int[] Offset)
+        /// <summary>
+        /// Gets a base address of module inside of the 32-bit process.
+        /// </summary>
+        /// <param name="gameProcess">Process for which to get base address.</param>
+        /// <param name="moduleName">Module nume for which to get base address (lowercase!).</param>
+        /// <returns>Base address of a module or 0 if none found.</returns>
+        public static IntPtr GetWow64ModuleBase(this Process gameProcess, string moduleName)
         {
-            byte Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger((int)Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryByte((int)Handle, Pointer, ref Value, 2, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static int ReadPointerInteger(Process[] Proc, int Pointer, int[] Offset)
-        {
-            int Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger((int)Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryInteger((int)Handle, Pointer, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static float ReadPointerFloat(Process[] Proc, int Pointer, int[] Offset)
-        {
-            float Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger((int)Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryFloat((int)Handle, Pointer, ref Value, 4, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
-        public static double ReadPointerDouble(Process[] Proc, int Pointer, int[] Offset)
-        {
-            double Value = 0;
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger((int)Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            ReadProcessMemoryDouble((int)Handle, Pointer, ref Value, 8, ref Bytes);
-                            CloseHandle(Handle);
-                        }
-                    }
-                }
-                catch
-                { }
-            }
-            return Value;
-        }
+            const int LIST_MODULES_ALL = 5;
+            const int MAX_PATH = 260;
+            var hModules = new IntPtr[1024];
 
-        public static void WriteByte(Process[] Proc, int Address, byte Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryByte(Handle, Address, ref Value, 1, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteInteger(Process[] Proc, int Address, int Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryInteger(Handle, Address, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteFloat(Process[] Proc, int Address, float Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryFloat(Handle, Address, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
+            uint cb = (uint)IntPtr.Size * (uint)hModules.Length;
+            uint cbNeeded;
+            if (!EnumProcessModulesEx(gameProcess.Handle, hModules, cb, out cbNeeded, LIST_MODULES_ALL))
+                throw new Win32Exception();
+            uint numMods = cbNeeded / (uint)IntPtr.Size;
 
-                }
-                catch
-                { }
-            }
-        }
-        public static void WriteDouble(Process[] Proc, int Address, double Value)
-        {
-            checked
+            var sb = new StringBuilder(MAX_PATH);
+            for (int i = 0; i < numMods; i++)
             {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Bytes = 0;
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            WriteProcessMemoryDouble(Handle, Address, ref Value, 8, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
+                sb.Clear();
+                if (GetModuleBaseName(gameProcess.Handle, hModules[i], sb, (uint)sb.Capacity) == 0)
+                    throw new Win32Exception();
+                string baseName = sb.ToString();
 
-        public static void WritePointerByte(Process[] Proc, int Pointer, int[] Offset, byte Value)
-        {
-            checked
-            {
-                try
+                if (baseName.ToLower() == moduleName)
                 {
-                    if (Proc.Length != 0)
+                    var moduleInfo = new MODULEINFO();
+                    if (!GetModuleInformation(gameProcess.Handle, hModules[i], out moduleInfo,
+                                              (uint)Marshal.SizeOf(moduleInfo)))
                     {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            int Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger(Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryByte(Handle, Pointer, ref Value, 2, ref Bytes);
-                        }
-                        CloseHandle(Handle);
+                        throw new Win32Exception();
                     }
+                    return moduleInfo.lpBaseOfDll;
                 }
-                catch
-                { }
             }
-        }
-        public static void WritePointerInteger(Process[] Proc, int Pointer, int[] Offset, int Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            int Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger(Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryInteger(Handle, Pointer, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WritePointerFloat(Process[] Proc, int Pointer, int[] Offset, float Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            int Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger(Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryFloat(Handle, Pointer, ref Value, 4, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
-        }
-        public static void WritePointerDouble(Process[] Proc, int Pointer, int[] Offset, double Value)
-        {
-            checked
-            {
-                try
-                {
-                    if (Proc.Length != 0)
-                    {
-                        int Handle = OpenProcess(PROCESS_ALL_ACCESS, 0, Proc[0].Id);
-                        if (Handle != 0)
-                        {
-                            int Bytes = 0;
-                            foreach (int i in Offset)
-                            {
-                                ReadProcessMemoryInteger(Handle, Pointer, ref Pointer, 4, ref Bytes);
-                                Pointer += i;
-                            }
-                            WriteProcessMemoryDouble(Handle, Pointer, ref Value, 8, ref Bytes);
-                        }
-                        CloseHandle(Handle);
-                    }
-                }
-                catch
-                { }
-            }
+
+            return IntPtr.Zero;
         }
     }
 }

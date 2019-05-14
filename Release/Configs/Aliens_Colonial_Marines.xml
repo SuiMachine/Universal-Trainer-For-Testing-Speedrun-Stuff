@@ -1,4 +1,4 @@
-<Config x64="false">
+<Config>
 	<ProcessName>ACM</ProcessName>
 	<Position>
 		<Pointer>0x01DAB36C, 0x0, 0x28, 0x238, 0x5c</Pointer>

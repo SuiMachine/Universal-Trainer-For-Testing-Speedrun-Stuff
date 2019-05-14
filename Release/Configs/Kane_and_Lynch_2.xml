@@ -1,4 +1,4 @@
-<Config x64="false">
+<Config>
 	<ProcessName>kl2</ProcessName>
 	<Position>
 		<Pointer>0x0114D9E0, 0x10, 0x7EC, 0xA0</Pointer>

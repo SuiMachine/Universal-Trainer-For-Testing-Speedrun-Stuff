@@ -1,4 +1,4 @@
-<Config x64="true">
+<Config>
 	<ProcessName>OLGame</ProcessName>
 	<Position>
 		<Pointer>0x003F295C, 0x24</Pointer>

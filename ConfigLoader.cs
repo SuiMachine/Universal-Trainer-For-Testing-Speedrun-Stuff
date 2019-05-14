@@ -5,24 +5,24 @@ using System.Text;
 using System.IO;
 using System.Xml;
 using System.Windows.Forms;
-#if BUILD64
 using MemoryReads64;
-using UniversalInt = System.Int64;
-#else
-using MemoryReads;
-using UniversalInt = System.Int32;
-#endif
 
 namespace Flying47
 {
     static class ConfigLoader
     {
-#if BUILD64
-        const bool Is64BitVersion = true;
-#else
-        const bool Is64BitVersion = false;
-#endif
-
+        /// <summary>
+        /// Reads pointers and addresses together with properties from Config file.
+        /// </summary>
+        /// <param name="ProcessName">Outputed name of a process.</param>
+        /// <param name="positionSet">Ouutputed set of pointers for 3D position.</param>
+        /// <param name="sinAlpha">Outputed pointer to angle SinAlpha (rotation around Z axis).</param>
+        /// <param name="sinInverted">Outputed bool value saying whatever the sinAlpha needs to be inverted.</param>
+        /// <param name="cosAlpha">Outputed pointer to angle CosAlpha (rotation around Z axis).</param>
+        /// <param name="cosInverted">Outputed bool value saying whatever the cosAlpha needs to be inverted.</param>
+        /// <param name="MoveXYAmount">Outputed default move aount on X,Y axis. </param>
+        /// <param name="MoveZAmount">Outputed default move amount on Z (height) axis.</param>
+        /// <returns>Bool depending on whatever the read was sucessfull or not.</returns>
         public static bool LoadFullConfig(out string ProcessName, out PositionSet positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
         {
             string XML_FILE_NAME = "universal_trainer_for_testing.xml";
@@ -55,11 +55,6 @@ namespace Flying47
             XmlDocument doc = new XmlDocument();
             doc.Load(XML_FILE_NAME);
             XmlNode rootNode = doc["Config"];
-            bool Requires64Bit = bool.Parse(rootNode.Attributes["x64"].InnerText);
-            if (!Is64BitVersion && Requires64Bit)
-                throw new Exception("Following config requires 64bit executable!");
-            else if(Is64BitVersion && !Requires64Bit)
-                throw new Exception("Following config requires 32bit executable!");
 
             ProcessName = rootNode["ProcessName"].InnerText;
             positionSet = rootNode["Position"].ToPositionSet();
@@ -84,6 +79,11 @@ namespace Flying47
             return true;
         }
 
+        /// <summary>
+        /// Parses position set from XML node.
+        /// </summary>
+        /// <param name="node">Node from which to parse Position Set.</param>
+        /// <returns>PositionSet (set of 3 pointers).</returns>
         private static PositionSet ToPositionSet(this XmlNode node)
         {
             Pointer ptr = node["Pointer"].ToPointer();
@@ -91,40 +91,48 @@ namespace Flying47
             return new PositionSet(ptr, isXZy);
         }
 
+        /// <summary>
+        /// Parses a pointer from XML node.
+        /// </summary>
+        /// <param name="node">Node from which to parse the pointer from.</param>
+        /// <returns>Pointer.</returns>
         private static Pointer ToPointer(this XmlNode node)
         {
             string content = node.InnerText;
+            string moduleName = node.Attributes["Module"] != null ? node.Attributes["Module"].InnerText : "";
+
             if (content.Contains(','))
             {
                 string[] split = content.Split(',');
-                UniversalInt[] Offsets = new UniversalInt[split.Length - 1];
-                UniversalInt baseAddress = HexDecParse(split[0].Trim());
+                int[] Offsets = new int[split.Length - 1];
+                Int64 baseOffset = HexDecParse(split[0].Trim());
                 for(int i=0; i<Offsets.Length;i++)
                 {
                     Offsets[i] = HexDecParse(split[i+1].Trim());
                 }
-                return new Pointer(baseAddress, Offsets);
+                return new Pointer(moduleName, baseOffset, Offsets);
             }
             else
             {
-                return new Pointer(HexDecParse(content), new UniversalInt[0]);
+                return new Pointer(moduleName, HexDecParse(content), new int[0]);
             }
         }
 
-        private static UniversalInt HexDecParse(string text)
+        /// <summary>
+        /// Checks whatever the string is hexadecimal or not and parses int from it.
+        /// </summary>
+        /// <param name="text">Text which to parse</param>
+        /// <returns>Parsed value</returns>
+        private static int HexDecParse(string text)
         {
             if(!text.StartsWith("0x"))
             {
-                return UniversalInt.Parse(text);
+                return int.Parse(text);
             }
             else
             {
                 text = text.Substring(2, text.Length - 2);
-#if BUILD64
-                return Convert.ToInt64(text, 16);
-#else
                 return Convert.ToInt32(text, 16);
-#endif
             }
         }
     }

@@ -4,25 +4,16 @@ using System.Drawing;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Media;
-#if BUILD64
 using MemoryReads64;
-using UniversalInt = System.Int64;
-#else
-using MemoryReads;
-using UniversalInt = System.Int32;
-#endif
+using System.Linq;
 
 
 namespace Flying47
 {
     public partial class MainForm : Form
     {
-        // Base address value for pointers.
-        UniversalInt baseAddress = 0x00000000;
-
         // Other variables.
-        System.Text.Encoding enc = System.Text.Encoding.UTF8;
-        Process[] myProcess;
+        Process myProcess;
         string processName;
 
         float readCoordX = 0;
@@ -98,7 +89,7 @@ namespace Flying47
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
                     m_GlobalHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
-                    m_GlobalHook.KeyDown += M_GlobalHook_KeyDown;
+                    m_GlobalHook.KeyDown += GlobalHook_KeyDown;
                 }
                 else
                     Application.Exit();
@@ -110,34 +101,18 @@ namespace Flying47
             }
         }
 
-        enum KeysUsed : uint
-        {
-            storePosition,
-            loadPosition,
-            up,
-            down,
-            forward
-        }
-
         bool foundProcess = false;
 
         private void Timer_Tick(object sender, EventArgs e)
         {
             try
             {
-                myProcess = Process.GetProcessesByName(processName);
-                if (myProcess.Length > 0 )
+                myProcess = Process.GetProcessesByName(processName).FirstOrDefault();
+                if (myProcess != null )
                 {
-                    if(foundProcess == false || baseAddress == 0x0 )
+                    if(foundProcess == false )
                     {
                         TTimer.Interval = 1000;
-                        IntPtr startOffset = myProcess[0].MainModule.BaseAddress;
-#if BUILD64
-                        baseAddress = startOffset.ToInt64();
-#else
-                        baseAddress = startOffset.ToInt32();
-#endif
-                        Debug.WriteLine("Trying to get baseAddresses");
                     }
 
                     foundProcess = true;
@@ -154,16 +129,17 @@ namespace Flying47
                     LB_Running.Text = processName + " is running";
                     LB_Running.ForeColor = Color.Green;
 
-                    positionAddress.ReadSet(myProcess, baseAddress, out readCoordX, out readCoordY, out readCoordZ);
+                    positionAddress.ReadSet(myProcess, out readCoordX, out readCoordY, out readCoordZ);
+                    var test = Trainer.ReadPointerInteger(myProcess, positionAddress.X);
                     L_X.Text = readCoordX.ToString();
                     L_Y.Text = readCoordY.ToString();
                     L_Z.Text = readCoordZ.ToString();
                     if(AnglesEnabled)
                     {
-                        readSinAlpha = Trainer.ReadPointerFloat(myProcess, baseAddress + adrSinAlpha.baseaddress, adrSinAlpha.offsets);
+                        readSinAlpha = Trainer.ReadPointerFloat(myProcess, adrSinAlpha);
                         if (isSinInverted)
                             readSinAlpha = -readSinAlpha;
-                        readCosAlpha = Trainer.ReadPointerFloat(myProcess, baseAddress + adrCosAlpha.baseaddress, adrCosAlpha.offsets);
+                        readCosAlpha = Trainer.ReadPointerFloat(myProcess, adrCosAlpha);
                         if (isCosInverted)
                             readCosAlpha = -readCosAlpha;
                         DrawVectorDisplay();
@@ -190,7 +166,6 @@ namespace Flying47
         {
             gBuffer.Clear(Color.Black);
             float width = bitmap.Width;
-            float height = bitmap.Height;
             float half = width/2; //make sure it's square
             gBuffer.DrawLine(new Pen(Color.Blue, 2), half, half, half + half*readSinAlpha, half + half * readCosAlpha);
         }
@@ -203,7 +178,7 @@ namespace Flying47
             L_Z.Text = "NaN";
         }
 
-        private void M_GlobalHook_KeyDown(object sender, KeyEventArgs e)
+        private void GlobalHook_KeyDown(object sender, KeyEventArgs e)
         {
             var hotkey = e.KeyCode;
             if (hotkey == Keys.None)
@@ -267,25 +242,25 @@ namespace Flying47
 
         private void SendMeForward()
         {
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.X.baseaddress, positionAddress.X.offsets, readCoordX + readSinAlpha * moveAmountXYAxis);
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.Y.baseaddress, positionAddress.Y.offsets, readCoordY + readCosAlpha * moveAmountXYAxis);
+            Trainer.WritePointerFloat(myProcess, positionAddress.X, readCoordX + readSinAlpha * moveAmountXYAxis);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Y, readCoordY + readCosAlpha * moveAmountXYAxis);
         }
 
         private void SendMeDown()
         {
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.Z.baseaddress, positionAddress.Z.offsets, readCoordZ - moveAmountZAxis);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Z, readCoordZ - moveAmountZAxis);
         }
 
         private void SendMeUp()
         {
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.Z.baseaddress, positionAddress.Z.offsets, readCoordZ + moveAmountZAxis);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Z, readCoordZ + moveAmountZAxis);
         }
 
         private void Load_Position()
         {
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.X.baseaddress, positionAddress.X.offsets, storedCoordX);
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.Y.baseaddress, positionAddress.Y.offsets, storedCoordY);
-            Trainer.WritePointerFloat(myProcess, baseAddress + positionAddress.Z.baseaddress, positionAddress.Z.offsets, storedCoordZ);
+            Trainer.WritePointerFloat(myProcess, positionAddress.X, storedCoordX);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Y, storedCoordY);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Z, storedCoordZ);
         }
 
         private void Save_Position()
@@ -299,7 +274,7 @@ namespace Flying47
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (m_GlobalHook != null)
-                m_GlobalHook.KeyDown -= M_GlobalHook_KeyDown;
+                m_GlobalHook.KeyDown -= GlobalHook_KeyDown;
         }
 
         private void B_ChangeButton(object sender, EventArgs e)
