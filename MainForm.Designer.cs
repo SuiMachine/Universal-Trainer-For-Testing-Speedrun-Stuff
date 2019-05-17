@@ -156,6 +156,7 @@
             this.B_KeyForward.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.B_KeyForward.UseVisualStyleBackColor = true;
             this.B_KeyForward.CheckedChanged += new System.EventHandler(this.B_ChangeButton);
+            this.B_KeyForward.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // B_KeyDown
             // 
@@ -168,6 +169,7 @@
             this.B_KeyDown.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.B_KeyDown.UseVisualStyleBackColor = true;
             this.B_KeyDown.CheckedChanged += new System.EventHandler(this.B_ChangeButton);
+            this.B_KeyDown.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // B_KeyUp
             // 
@@ -180,6 +182,7 @@
             this.B_KeyUp.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.B_KeyUp.UseVisualStyleBackColor = true;
             this.B_KeyUp.CheckedChanged += new System.EventHandler(this.B_ChangeButton);
+            this.B_KeyUp.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // label9
             // 
@@ -210,6 +213,7 @@
             this.B_LoadPosition.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.B_LoadPosition.UseVisualStyleBackColor = true;
             this.B_LoadPosition.CheckedChanged += new System.EventHandler(this.B_ChangeButton);
+            this.B_LoadPosition.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // B_StorePosition
             // 
@@ -222,6 +226,7 @@
             this.B_StorePosition.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.B_StorePosition.UseVisualStyleBackColor = true;
             this.B_StorePosition.CheckedChanged += new System.EventHandler(this.B_ChangeButton);
+            this.B_StorePosition.KeyDown += new System.Windows.Forms.KeyEventHandler(this.MainForm_KeyDown);
             // 
             // label6
             // 
@@ -280,7 +285,7 @@
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 122F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 123F));
             this.tableLayoutPanel1.Controls.Add(this.L_Z, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.L_Y, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label5, 2, 0);
@@ -292,7 +297,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(326, 63);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(327, 63);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // L_Z

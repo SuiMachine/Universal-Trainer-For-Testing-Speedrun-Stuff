@@ -7,7 +7,6 @@ using System.Media;
 using MemoryReads64;
 using System.Linq;
 
-
 namespace Flying47
 {
     public partial class MainForm : Form
@@ -49,7 +48,7 @@ namespace Flying47
         Bitmap bitmap;
         Graphics gBuffer;
 
-        Gma.System.MouseKeyHook.IKeyboardEvents m_GlobalHook;
+        KeyboardHook.KeyboardHook m_KeyboardHook;
 
 
         /*------------------
@@ -85,11 +84,11 @@ namespace Flying47
                     TB_MoveXYAxis.Text = moveAmountXYAxis.ToString();
                     TB_MoveZAxis.Text = moveAmountZAxis.ToString();
 
-
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
-                    m_GlobalHook = Gma.System.MouseKeyHook.Hook.GlobalEvents();
-                    m_GlobalHook.KeyDown += GlobalHook_KeyDown;
+                    m_KeyboardHook = new KeyboardHook.KeyboardHook();
+                    RegisterKeys();
+                    m_KeyboardHook.KeyPressed += GlobalHook_KeyDown;
                 }
                 else
                     Application.Exit();
@@ -101,12 +100,24 @@ namespace Flying47
             }
         }
 
+        private void RegisterKeys()
+        {
+            m_KeyboardHook.RegisterHotKey(kStorePosition);
+            m_KeyboardHook.RegisterHotKey(kStorePosition);
+            m_KeyboardHook.RegisterHotKey(kLoadPosition);
+            m_KeyboardHook.RegisterHotKey(kUp);
+            m_KeyboardHook.RegisterHotKey(kDown);
+            m_KeyboardHook.RegisterHotKey(kForward);
+        }
+
         bool foundProcess = false;
 
         private void Timer_Tick(object sender, EventArgs e)
         {
             try
             {
+                m_KeyboardHook.Poll();
+
                 myProcess = Process.GetProcessesByName(processName).FirstOrDefault();
                 if (myProcess != null )
                 {
@@ -209,35 +220,6 @@ namespace Flying47
                     SendMeForward();
                 }
             }
-            else
-            {
-                if (hotkey == Keys.Escape)
-                    hotkey = Keys.None;
-                switch (CurrentKeyChange)
-                {
-                    case "B_KeyUp":
-                        kUp = hotkey;
-                        B_KeyUp.Text = kUp.ToString();
-                        break;
-                    case "B_KeyDown":
-                        kDown = hotkey;
-                        B_KeyDown.Text = kDown.ToString();
-                        break;
-                    case "B_KeyForward":
-                        kForward = hotkey;
-                        B_KeyForward.Text = kForward.ToString();
-                        break;
-                    case "B_StorePosition":
-                        kStorePosition = hotkey;
-                        B_StorePosition.Text = kStorePosition.ToString();
-                        break;
-                    case "B_LoadPosition":
-                        kLoadPosition = hotkey;
-                        B_LoadPosition.Text = kLoadPosition.ToString();
-                        break;
-                }
-                settingInputKey = false;
-            }
         }
 
         private void SendMeForward()
@@ -273,8 +255,11 @@ namespace Flying47
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (m_GlobalHook != null)
-                m_GlobalHook.KeyDown -= GlobalHook_KeyDown;
+            if (m_KeyboardHook != null)
+            {
+                m_KeyboardHook.UnregisterAllHotkeys();
+                m_KeyboardHook.KeyPressed -= GlobalHook_KeyDown;
+            }
         }
 
         private void B_ChangeButton(object sender, EventArgs e)
@@ -331,6 +316,45 @@ namespace Flying47
                     if (MovXYAxisNew > 0)
                         moveAmountXYAxis = MovXYAxisNew;
                 }
+            }
+        }
+
+        private void MainForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if(settingInputKey)
+            {
+                var hotkey = e.KeyCode;
+
+                if (hotkey == Keys.Escape)
+                    hotkey = Keys.None;
+                switch (CurrentKeyChange)
+                {
+                    case "B_KeyUp":
+                        kUp = hotkey;
+                        B_KeyUp.Text = kUp.ToString();
+                        break;
+                    case "B_KeyDown":
+                        kDown = hotkey;
+                        B_KeyDown.Text = kDown.ToString();
+                        break;
+                    case "B_KeyForward":
+                        kForward = hotkey;
+                        B_KeyForward.Text = kForward.ToString();
+                        break;
+                    case "B_StorePosition":
+                        kStorePosition = hotkey;
+                        B_StorePosition.Text = kStorePosition.ToString();
+                        break;
+                    case "B_LoadPosition":
+                        kLoadPosition = hotkey;
+                        B_LoadPosition.Text = kLoadPosition.ToString();
+                        break;
+                }
+
+                m_KeyboardHook.UnregisterAllHotkeys();
+                RegisterKeys();
+
+                settingInputKey = false;
             }
         }
     }
