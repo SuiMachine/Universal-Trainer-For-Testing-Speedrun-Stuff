@@ -91,12 +91,14 @@ namespace MemoryReads64
         /// </summary>
         public Pointer Z { get; private set; }
 
+
         /// <summary>
         /// Constructor for a struct, that creates 2 further pointers after providing it pointer to X axis.
         /// </summary>
         /// <param name="position">Pointer to X axis.</param>
         /// <param name="isXZY">Bool value of whatever the coordinates are stored as XZY, where Z is height.</param>
-        public PositionSet(Pointer position, bool isXZY = false)
+        /// <param name="byteGapLenth">Amount of bytes between the values.</param>
+        public PositionSet(Pointer position, int byteGapLenth, bool isXZY = false)
         {
             X = position;
             var offsets = position.Offsets;
@@ -119,9 +121,9 @@ namespace MemoryReads64
                 if (!isXZY)
                 {
                     var copy1 = (int[])offsets.Clone();
-                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
+                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + byteGapLenth;
                     var copy2 = (int[])copy1.Clone();
-                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
+                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + byteGapLenth;
 
                     Y = new Pointer(position.BaseModuleName, position.BaseOffset, copy1);
                     Z = new Pointer(position.BaseModuleName, position.BaseOffset, copy2);
@@ -129,9 +131,9 @@ namespace MemoryReads64
                 else
                 {
                     var copy1 = (int[])offsets.Clone();
-                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + 0x4;
+                    copy1[copy1.Length - 1] = copy1[copy1.Length - 1] + byteGapLenth;
                     var copy2 = (int[])copy1.Clone();
-                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + 0x4;
+                    copy2[copy2.Length - 1] = copy2[copy1.Length - 1] + byteGapLenth;
 
                     Z = new Pointer(position.BaseModuleName, position.BaseOffset, copy1);
                     Y = new Pointer(position.BaseModuleName, position.BaseOffset, copy2);

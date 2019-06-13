@@ -74,8 +74,13 @@ namespace Flying47
                 cosInverted = false;
             }
 
-            MoveXYAmount = float.Parse(rootNode["MoveXYAmount"].InnerText);
-            MoveZAmount = float.Parse(rootNode["MoveZAmount"].InnerText);
+            System.Globalization.NumberFormatInfo frt = new System.Globalization.NumberFormatInfo()
+            {
+                NumberDecimalSeparator = "."
+            };
+
+            MoveXYAmount = float.Parse(rootNode["MoveXYAmount"].InnerText, frt);
+            MoveZAmount = float.Parse(rootNode["MoveZAmount"].InnerText, frt);
             return true;
         }
 
@@ -87,8 +92,11 @@ namespace Flying47
         private static PositionSet ToPositionSet(this XmlNode node)
         {
             Pointer ptr = node["Pointer"].ToPointer();
+            int bytegap = 4;
+            if (node["ByteGap"] != null)
+                bytegap = int.Parse(node["ByteGap"].InnerText);
             bool isXZy = bool.Parse(node["XZY"].InnerText);
-            return new PositionSet(ptr, isXZy);
+            return new PositionSet(ptr, bytegap, isXZy);
         }
 
         /// <summary>

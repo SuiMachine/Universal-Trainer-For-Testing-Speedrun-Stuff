@@ -1,0 +1,10 @@
+<Config>
+	<ProcessName>Metro2033</ProcessName>
+	<Position>
+		<Pointer>0x006153C8, 0xA8, 0x0, 0xF4, 0x11C</Pointer>
+		<XZY>true</XZY>
+		<ByteGap>8</ByteGap>
+	</Position>
+	<MoveXYAmount>0.01</MoveXYAmount>
+	<MoveZAmount>0.4</MoveZAmount>
+</Config>
