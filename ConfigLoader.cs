@@ -133,7 +133,9 @@ namespace Flying47
         /// <returns>Parsed value</returns>
         private static int HexDecParse(string text)
         {
-            if(!text.StartsWith("0x"))
+            if (text == "")
+                return 0;
+            else if(!text.StartsWith("0x"))
             {
                 return int.Parse(text);
             }
