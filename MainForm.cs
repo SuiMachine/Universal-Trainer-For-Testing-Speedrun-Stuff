@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Media;
 using MemoryReads64;
 using System.Linq;
+using System.IO;
 
 namespace Flying47
 {
@@ -13,7 +14,7 @@ namespace Flying47
     {
         // Other variables.
         Process myProcess;
-        string processName;
+        public string processName;
 
         float readCoordX = 0;
         float readCoordY = 0;
@@ -21,12 +22,9 @@ namespace Flying47
         float readSinAlpha = 0;
         float readCosAlpha = 0;
 
-        float storedCoordX = 0;
-        float storedCoordY = 0;
-        float storedCoordZ = 0;
-
         float moveAmountXYAxis = 5f;
         float moveAmountZAxis = 5f;
+
 
         //Block related to position
         bool AnglesEnabled = true;
@@ -35,12 +33,12 @@ namespace Flying47
         Pointer adrCosAlpha;
         bool isCosInverted = false;
 
-        PositionSet positionAddress;
-        Keys kStorePosition = Keys.NumPad7;
-        Keys kLoadPosition = Keys.NumPad9;
-        Keys kUp = Keys.Add;
-        Keys kDown = Keys.Subtract;
-        Keys kForward = Keys.NumPad8;
+        //Used for storing coordinates
+        public Structs.PositionSet_Coordinates storedCoordinates = new Structs.PositionSet_Coordinates();
+
+        PositionSet_Pointer positionAddress;
+        Structs.KeySet KeysSet;
+        public Structs.PositionSets ListOfStoredPositions;
 
         string CurrentKeyChange;
         bool settingInputKey = false;
@@ -64,22 +62,41 @@ namespace Flying47
         {
             try
             {
-                if (ConfigLoader.LoadFullConfig(out processName, out positionAddress, out adrSinAlpha, out isSinInverted, out adrCosAlpha, out isCosInverted, out moveAmountXYAxis, out moveAmountZAxis))
+                if (GameConfigLoader.LoadFullConfig(out processName, out positionAddress, out adrSinAlpha, out isSinInverted, out adrCosAlpha, out isCosInverted, out moveAmountXYAxis, out moveAmountZAxis))
                 {
+                    if (ProgramConfig.LoadFullConfig(out Structs.KeySet LoadedSet))
+                        KeysSet = LoadedSet;
+                    else
+                        KeysSet = new Structs.KeySet();
+
+                    if(File.Exists(Path.Combine("Stored Lists", processName + ".xpos")))
+                    {
+                        DialogResult res = MessageBox.Show("Seems like there is a stored list of positions for current application, do you want to load it?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                        if (res == DialogResult.Yes)
+                        {
+                            ListOfStoredPositions = Structs.PositionSets.Load(Path.Combine("Stored Lists", processName + ".xpos"));
+                        }
+                        else
+                            ListOfStoredPositions = new Structs.PositionSets();
+                    }
+                    else
+                        ListOfStoredPositions = new Structs.PositionSets();
+
+
                     if (adrSinAlpha.IsNull() || adrCosAlpha.IsNull())
                     {
                         AnglesEnabled = false;
-                        kForward = Keys.None;
+                        KeysSet.Forward = Keys.None;
                         B_KeyForward.Enabled = false;
                     }
 
                     TTimer.Start();
 
-                    B_KeyForward.Text = kForward.ToString();
-                    B_StorePosition.Text = kStorePosition.ToString();
-                    B_LoadPosition.Text = kLoadPosition.ToString();
-                    B_KeyUp.Text = kUp.ToString();
-                    B_KeyDown.Text = kDown.ToString();
+                    B_KeyForward.Text = KeysSet.Forward.ToString();
+                    B_StorePosition.Text = KeysSet.StorePosition.ToString();
+                    B_LoadPosition.Text = KeysSet.LoadPosition.ToString();
+                    B_KeyUp.Text = KeysSet.Up.ToString();
+                    B_KeyDown.Text = KeysSet.Down.ToString();
 
                     TB_MoveXYAxis.Text = moveAmountXYAxis.ToString();
                     TB_MoveZAxis.Text = moveAmountZAxis.ToString();
@@ -87,6 +104,7 @@ namespace Flying47
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
                     m_KeyboardHook = new KeyboardHook.KeyboardHook();
+                    m_KeyboardHook.KeysEnabled = true;
                     RegisterKeys();
                     m_KeyboardHook.KeyPressed += GlobalHook_KeyDown;
                 }
@@ -102,12 +120,11 @@ namespace Flying47
 
         private void RegisterKeys()
         {
-            m_KeyboardHook.RegisterHotKey(kStorePosition);
-            m_KeyboardHook.RegisterHotKey(kStorePosition);
-            m_KeyboardHook.RegisterHotKey(kLoadPosition);
-            m_KeyboardHook.RegisterHotKey(kUp);
-            m_KeyboardHook.RegisterHotKey(kDown);
-            m_KeyboardHook.RegisterHotKey(kForward);
+            m_KeyboardHook.RegisterHotKey(KeysSet.StorePosition);
+            m_KeyboardHook.RegisterHotKey(KeysSet.LoadPosition);
+            m_KeyboardHook.RegisterHotKey(KeysSet.Up);
+            m_KeyboardHook.RegisterHotKey(KeysSet.Down);
+            m_KeyboardHook.RegisterHotKey(KeysSet.Forward);
         }
 
         bool foundProcess = false;
@@ -197,25 +214,25 @@ namespace Flying47
 
             if (!settingInputKey)
             {
-                if (hotkey == kStorePosition)
+                if (hotkey == KeysSet.StorePosition)
                 {
                     Save_Position();
                 }
-                else if (hotkey == kLoadPosition)
+                else if (hotkey == KeysSet.LoadPosition)
                 {
                     Load_Position();
                 }
 
-                if (hotkey == kUp)
+                if (hotkey == KeysSet.Up)
                 {
                     SendMeUp();
                 }
-                else if (hotkey == kDown)
+                else if (hotkey == KeysSet.Down)
                 {
                     SendMeDown();
                 }
 
-                if (hotkey == kForward)
+                if (hotkey == KeysSet.Forward)
                 {
                     SendMeForward();
                 }
@@ -238,18 +255,18 @@ namespace Flying47
             Trainer.WritePointerFloat(myProcess, positionAddress.Z, readCoordZ + moveAmountZAxis);
         }
 
-        private void Load_Position()
+        public void Load_Position()
         {
-            Trainer.WritePointerFloat(myProcess, positionAddress.X, storedCoordX);
-            Trainer.WritePointerFloat(myProcess, positionAddress.Y, storedCoordY);
-            Trainer.WritePointerFloat(myProcess, positionAddress.Z, storedCoordZ);
+            Trainer.WritePointerFloat(myProcess, positionAddress.X, storedCoordinates.X);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Y, storedCoordinates.Y);
+            Trainer.WritePointerFloat(myProcess, positionAddress.Z, storedCoordinates.Z);
         }
 
         private void Save_Position()
         {
-            storedCoordX = readCoordX;
-            storedCoordY = readCoordY;
-            storedCoordZ = readCoordZ;
+            storedCoordinates.X = readCoordX;
+            storedCoordinates.Y = readCoordY;
+            storedCoordinates.Z = readCoordZ;
         }
 
 
@@ -330,24 +347,24 @@ namespace Flying47
                 switch (CurrentKeyChange)
                 {
                     case "B_KeyUp":
-                        kUp = hotkey;
-                        B_KeyUp.Text = kUp.ToString();
+                        KeysSet.Up = hotkey;
+                        B_KeyUp.Text = KeysSet.Up.ToString();
                         break;
                     case "B_KeyDown":
-                        kDown = hotkey;
-                        B_KeyDown.Text = kDown.ToString();
+                        KeysSet.Down = hotkey;
+                        B_KeyDown.Text = KeysSet.Down.ToString();
                         break;
                     case "B_KeyForward":
-                        kForward = hotkey;
-                        B_KeyForward.Text = kForward.ToString();
+                        KeysSet.Forward = hotkey;
+                        B_KeyForward.Text = KeysSet.Forward.ToString();
                         break;
                     case "B_StorePosition":
-                        kStorePosition = hotkey;
-                        B_StorePosition.Text = kStorePosition.ToString();
+                        KeysSet.StorePosition = hotkey;
+                        B_StorePosition.Text = KeysSet.StorePosition.ToString();
                         break;
                     case "B_LoadPosition":
-                        kLoadPosition = hotkey;
-                        B_LoadPosition.Text = kLoadPosition.ToString();
+                        KeysSet.LoadPosition = hotkey;
+                        B_LoadPosition.Text = KeysSet.LoadPosition.ToString();
                         break;
                 }
 
@@ -356,6 +373,21 @@ namespace Flying47
 
                 settingInputKey = false;
             }
+        }
+
+        private void B_SaveProgramConfig_Click(object sender, EventArgs e)
+        {
+            if (ProgramConfig.SaveConfig(KeysSet))
+                MessageBox.Show("Done", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void B_OpenList_Click(object sender, EventArgs e)
+        {
+            m_KeyboardHook.KeysEnabled = false;
+            PositionsListForm posForm = new PositionsListForm(this, ListOfStoredPositions);
+            posForm.ShowDialog();
+
+            m_KeyboardHook.KeysEnabled = true;
         }
     }
 }

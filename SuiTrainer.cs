@@ -76,7 +76,7 @@ namespace MemoryReads64
     /// <summary>
     /// A set of 3 pointers describing position in 3d game (all of the reasonably written 3d games have them clamped together).
     /// </summary>
-    public struct PositionSet
+    public struct PositionSet_Pointer
     {
         /// <summary>
         /// Pointer for a point describing position on X axis.
@@ -98,7 +98,7 @@ namespace MemoryReads64
         /// <param name="position">Pointer to X axis.</param>
         /// <param name="isXZY">Bool value of whatever the coordinates are stored as XZY, where Z is height.</param>
         /// <param name="byteGapLenth">Amount of bytes between the values.</param>
-        public PositionSet(Pointer position, int byteGapLenth, bool isXZY = false)
+        public PositionSet_Pointer(Pointer position, int byteGapLenth, bool isXZY = false)
         {
             X = position;
             var offsets = position.Offsets;

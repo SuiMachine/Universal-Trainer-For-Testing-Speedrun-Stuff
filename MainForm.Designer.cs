@@ -34,6 +34,10 @@
             this.LB_Running = new System.Windows.Forms.Label();
             this.InputPanel = new System.Windows.Forms.Panel();
             this.KeyPanel = new System.Windows.Forms.Panel();
+            this.B_SaveProgramConfig = new System.Windows.Forms.Button();
+            this.label13 = new System.Windows.Forms.Label();
+            this.B_OpenList = new System.Windows.Forms.Button();
+            this.label12 = new System.Windows.Forms.Label();
             this.TB_MoveZAxis = new System.Windows.Forms.TextBox();
             this.TB_MoveXYAxis = new System.Windows.Forms.TextBox();
             this.label11 = new System.Windows.Forms.Label();
@@ -86,13 +90,17 @@
             this.InputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.InputPanel.Controls.Add(this.KeyPanel);
             this.InputPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.InputPanel.Location = new System.Drawing.Point(0, 120);
+            this.InputPanel.Location = new System.Drawing.Point(0, 122);
             this.InputPanel.Name = "InputPanel";
-            this.InputPanel.Size = new System.Drawing.Size(391, 125);
+            this.InputPanel.Size = new System.Drawing.Size(391, 147);
             this.InputPanel.TabIndex = 41;
             // 
             // KeyPanel
             // 
+            this.KeyPanel.Controls.Add(this.B_SaveProgramConfig);
+            this.KeyPanel.Controls.Add(this.label13);
+            this.KeyPanel.Controls.Add(this.B_OpenList);
+            this.KeyPanel.Controls.Add(this.label12);
             this.KeyPanel.Controls.Add(this.TB_MoveZAxis);
             this.KeyPanel.Controls.Add(this.TB_MoveXYAxis);
             this.KeyPanel.Controls.Add(this.label11);
@@ -108,8 +116,46 @@
             this.KeyPanel.Controls.Add(this.label1);
             this.KeyPanel.Location = new System.Drawing.Point(5, 8);
             this.KeyPanel.Name = "KeyPanel";
-            this.KeyPanel.Size = new System.Drawing.Size(380, 112);
+            this.KeyPanel.Size = new System.Drawing.Size(380, 133);
             this.KeyPanel.TabIndex = 41;
+            // 
+            // B_SaveProgramConfig
+            // 
+            this.B_SaveProgramConfig.Location = new System.Drawing.Point(293, 98);
+            this.B_SaveProgramConfig.Name = "B_SaveProgramConfig";
+            this.B_SaveProgramConfig.Size = new System.Drawing.Size(84, 23);
+            this.B_SaveProgramConfig.TabIndex = 60;
+            this.B_SaveProgramConfig.Text = "Save";
+            this.B_SaveProgramConfig.UseVisualStyleBackColor = true;
+            this.B_SaveProgramConfig.Click += new System.EventHandler(this.B_SaveProgramConfig_Click);
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(206, 103);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(81, 13);
+            this.label13.TabIndex = 58;
+            this.label13.Text = "Program config:";
+            // 
+            // B_OpenList
+            // 
+            this.B_OpenList.Location = new System.Drawing.Point(74, 98);
+            this.B_OpenList.Name = "B_OpenList";
+            this.B_OpenList.Size = new System.Drawing.Size(125, 23);
+            this.B_OpenList.TabIndex = 57;
+            this.B_OpenList.Text = "Open";
+            this.B_OpenList.UseVisualStyleBackColor = true;
+            this.B_OpenList.Click += new System.EventHandler(this.B_OpenList_Click);
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(4, 103);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(64, 13);
+            this.label12.TabIndex = 56;
+            this.label12.Text = "Teleport list:";
             // 
             // TB_MoveZAxis
             // 
@@ -121,9 +167,9 @@
             // 
             // TB_MoveXYAxis
             // 
-            this.TB_MoveXYAxis.Location = new System.Drawing.Point(62, 68);
+            this.TB_MoveXYAxis.Location = new System.Drawing.Point(69, 68);
             this.TB_MoveXYAxis.Name = "TB_MoveXYAxis";
-            this.TB_MoveXYAxis.Size = new System.Drawing.Size(123, 20);
+            this.TB_MoveXYAxis.Size = new System.Drawing.Size(130, 20);
             this.TB_MoveXYAxis.TabIndex = 54;
             this.TB_MoveXYAxis.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TB_MoveXYAxis_KeyDown);
             // 
@@ -139,7 +185,7 @@
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(2, 71);
+            this.label10.Location = new System.Drawing.Point(4, 71);
             this.label10.Name = "label10";
             this.label10.Size = new System.Drawing.Size(59, 13);
             this.label10.TabIndex = 52;
@@ -256,7 +302,7 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel1.Location = new System.Drawing.Point(0, 24);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(391, 96);
+            this.panel1.Size = new System.Drawing.Size(391, 98);
             this.panel1.TabIndex = 42;
             // 
             // label7
@@ -285,7 +331,7 @@
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 124F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 127F));
             this.tableLayoutPanel1.Controls.Add(this.L_Z, 2, 1);
             this.tableLayoutPanel1.Controls.Add(this.L_Y, 1, 1);
             this.tableLayoutPanel1.Controls.Add(this.label5, 2, 0);
@@ -297,7 +343,7 @@
             this.tableLayoutPanel1.RowCount = 2;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(328, 63);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(331, 63);
             this.tableLayoutPanel1.TabIndex = 2;
             // 
             // L_Z
@@ -376,7 +422,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(391, 245);
+            this.ClientSize = new System.Drawing.Size(391, 269);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.InputPanel);
             this.Controls.Add(this.LB_Running);
@@ -385,7 +431,6 @@
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Universal Trainer for Speedrunners";
-            this.TopMost = true;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.InputPanel.ResumeLayout(false);
@@ -430,6 +475,10 @@
         private System.Windows.Forms.TextBox TB_MoveXYAxis;
         private System.Windows.Forms.Label label11;
         private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.Button B_OpenList;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Button B_SaveProgramConfig;
+        private System.Windows.Forms.Label label13;
     }
 }
 

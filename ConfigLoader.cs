@@ -9,7 +9,7 @@ using MemoryReads64;
 
 namespace Flying47
 {
-    static class ConfigLoader
+    static class GameConfigLoader
     {
         /// <summary>
         /// Reads pointers and addresses together with properties from Config file.
@@ -23,7 +23,7 @@ namespace Flying47
         /// <param name="MoveXYAmount">Outputed default move aount on X,Y axis. </param>
         /// <param name="MoveZAmount">Outputed default move amount on Z (height) axis.</param>
         /// <returns>Bool depending on whatever the read was sucessfull or not.</returns>
-        public static bool LoadFullConfig(out string ProcessName, out PositionSet positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
+        public static bool LoadFullConfig(out string ProcessName, out PositionSet_Pointer positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
         {
             string XML_FILE_NAME = "universal_trainer_for_testing.xml";
 
@@ -41,7 +41,7 @@ namespace Flying47
                 else
                 {
                     ProcessName = "";
-                    positionSet = new PositionSet();
+                    positionSet = new PositionSet_Pointer();
                     sinAlpha = null;
                     sinInverted = false;
                     cosAlpha = null;
@@ -89,14 +89,14 @@ namespace Flying47
         /// </summary>
         /// <param name="node">Node from which to parse Position Set.</param>
         /// <returns>PositionSet (set of 3 pointers).</returns>
-        private static PositionSet ToPositionSet(this XmlNode node)
+        private static PositionSet_Pointer ToPositionSet(this XmlNode node)
         {
             Pointer ptr = node["Pointer"].ToPointer();
             int bytegap = 4;
             if (node["ByteGap"] != null)
                 bytegap = int.Parse(node["ByteGap"].InnerText);
             bool isXZy = bool.Parse(node["XZY"].InnerText);
-            return new PositionSet(ptr, bytegap, isXZy);
+            return new PositionSet_Pointer(ptr, bytegap, isXZy);
         }
 
         /// <summary>

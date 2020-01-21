@@ -12,6 +12,7 @@ namespace KeyboardHook
     {
         protected List<Keys> RegisteredKeys { get; set; }
         public event KeyEventHandler KeyPressed;
+        public bool KeysEnabled;
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         public static extern short GetAsyncKeyState(Keys vkey);
@@ -34,33 +35,37 @@ namespace KeyboardHook
 
         public void Poll()
         {
-            foreach (var key in RegisteredKeys)
+            if(KeysEnabled)
             {
-                var modifiersDown = true;
-                var modifiers = Keys.None;
-                if (key.HasFlag(Keys.Shift))
+                foreach (var key in RegisteredKeys)
                 {
-                    modifiersDown &= IsKeyDown(Keys.ShiftKey);
-                    modifiers |= Keys.Shift;
-                }
-                if (key.HasFlag(Keys.Control))
-                {
-                    modifiersDown &= IsKeyDown(Keys.ControlKey);
-                    modifiers |= Keys.Control;
-                }
-                if (key.HasFlag(Keys.Alt))
-                {
-                    modifiersDown &= IsKeyDown(Keys.Menu);
-                    modifiers |= Keys.Alt;
-                }
+                    var modifiersDown = true;
+                    var modifiers = Keys.None;
+                    if (key.HasFlag(Keys.Shift))
+                    {
+                        modifiersDown &= IsKeyDown(Keys.ShiftKey);
+                        modifiers |= Keys.Shift;
+                    }
+                    if (key.HasFlag(Keys.Control))
+                    {
+                        modifiersDown &= IsKeyDown(Keys.ControlKey);
+                        modifiers |= Keys.Control;
+                    }
+                    if (key.HasFlag(Keys.Alt))
+                    {
+                        modifiersDown &= IsKeyDown(Keys.Menu);
+                        modifiers |= Keys.Alt;
+                    }
 
-                var keyWithoutModifiers = key & ~modifiers;
-                var result = GetAsyncKeyState(keyWithoutModifiers);
-                var isPressed = ((result >> 15) & 1) == 1;
+                    var keyWithoutModifiers = key & ~modifiers;
+                    var result = GetAsyncKeyState(keyWithoutModifiers);
+                    var isPressed = ((result >> 15) & 1) == 1;
 
-                if (modifiersDown && isPressed)
-                    KeyPressed?.Invoke(this, new KeyEventArgs(key));
+                    if (modifiersDown && isPressed)
+                        KeyPressed?.Invoke(this, new KeyEventArgs(key));
+                }
             }
+
         }
 
         protected bool IsKeyDown(Keys key)
