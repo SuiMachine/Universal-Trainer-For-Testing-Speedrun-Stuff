@@ -16,6 +16,7 @@ namespace Flying47
     {
         public Structs.PositionSets Positions { get; set; }
         private MainForm parent;
+        bool ContentChanged = false;
 
         public PositionsListForm(MainForm parent, Structs.PositionSets Positions)
         {
@@ -42,6 +43,7 @@ namespace Flying47
                 positionGrid["Y", i].Value = elementToAdd.Y.ToString();
                 positionGrid["Z", i].Value = elementToAdd.Z.ToString();
             }
+            ContentChanged = false;
 
         }
 
@@ -52,6 +54,7 @@ namespace Flying47
             positionGrid["X", rowID].Value = parent.storedCoordinates.X.ToString();
             positionGrid["Y", rowID].Value = parent.storedCoordinates.Y.ToString();
             positionGrid["Z", rowID].Value = parent.storedCoordinates.Z.ToString();
+            ContentChanged = true;
             MessageBox.Show("A new entry was added with a currently stored position", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -63,7 +66,10 @@ namespace Flying47
                 var firstCell = selectedCells[0];
                 var rowID = firstCell.RowIndex;
                 if(rowID < positionGrid.Rows.Count -1)
+                {
                     positionGrid.Rows.RemoveAt(rowID);
+                    ContentChanged = true;
+                }
             }
         }
 
@@ -92,7 +98,6 @@ namespace Flying47
             var column = e.ColumnIndex;
             if ((column == 1 || column == 2 || column == 3) && positionGrid.EditingControl != null)
             {
-
                 var validatedValue = positionGrid.EditingControl.Text;
 
                 if (!float.TryParse(validatedValue, out float parseTest))
@@ -145,6 +150,7 @@ namespace Flying47
                 positions.Save(fd.FileName);
                 this.Positions = positions;
                 this.parent.ListOfStoredPositions = positions;
+                ContentChanged = false;
                 MessageBox.Show("Done", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -193,6 +199,21 @@ namespace Flying47
             {
                 return true;
             }
+        }
+
+        private void PositionsListForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(ContentChanged)
+            {
+                var result = MessageBox.Show("All unsaved changes will be lost, do you want to close the window?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
+                e.Cancel = (result == DialogResult.No);
+            }
+
+        }
+
+        private void positionGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        {
+            ContentChanged = true;
         }
     }
 }

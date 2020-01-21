@@ -35,12 +35,12 @@
             this.B_RemoveEntry = new System.Windows.Forms.Button();
             this.B_Add = new System.Windows.Forms.Button();
             this.B_LoadTable = new System.Windows.Forms.Button();
+            this.B_TeleportTo = new System.Windows.Forms.Button();
             this.positionGrid = new System.Windows.Forms.DataGridView();
             this.PosName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.X = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Y = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Z = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.B_TeleportTo = new System.Windows.Forms.Button();
             this.ContextMenu_DataGrid = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.addToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -134,6 +134,17 @@
             this.B_LoadTable.UseVisualStyleBackColor = true;
             this.B_LoadTable.Click += new System.EventHandler(this.B_LoadTable_Click);
             // 
+            // B_TeleportTo
+            // 
+            this.B_TeleportTo.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.B_TeleportTo.Location = new System.Drawing.Point(9, 69);
+            this.B_TeleportTo.Name = "B_TeleportTo";
+            this.B_TeleportTo.Size = new System.Drawing.Size(95, 38);
+            this.B_TeleportTo.TabIndex = 4;
+            this.B_TeleportTo.Text = "Teleport to selected";
+            this.B_TeleportTo.UseVisualStyleBackColor = true;
+            this.B_TeleportTo.Click += new System.EventHandler(this.B_TeleportTo_Click);
+            // 
             // positionGrid
             // 
             this.positionGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -150,6 +161,7 @@
             this.positionGrid.Size = new System.Drawing.Size(674, 444);
             this.positionGrid.TabIndex = 1;
             this.positionGrid.CellLeave += new System.Windows.Forms.DataGridViewCellEventHandler(this.positionGrid_CellLeave);
+            this.positionGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.positionGrid_CellValueChanged);
             // 
             // PosName
             // 
@@ -170,17 +182,6 @@
             // 
             this.Z.HeaderText = "Z";
             this.Z.Name = "Z";
-            // 
-            // B_TeleportTo
-            // 
-            this.B_TeleportTo.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.B_TeleportTo.Location = new System.Drawing.Point(9, 69);
-            this.B_TeleportTo.Name = "B_TeleportTo";
-            this.B_TeleportTo.Size = new System.Drawing.Size(95, 38);
-            this.B_TeleportTo.TabIndex = 4;
-            this.B_TeleportTo.Text = "Teleport to selected";
-            this.B_TeleportTo.UseVisualStyleBackColor = true;
-            this.B_TeleportTo.Click += new System.EventHandler(this.B_TeleportTo_Click);
             // 
             // ContextMenu_DataGrid
             // 
@@ -219,6 +220,7 @@
             this.Controls.Add(this.tableLayoutPanel2);
             this.Name = "PositionsListForm";
             this.Text = "List of Positions";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.PositionsListForm_FormClosing);
             this.Load += new System.EventHandler(this.PositionsListForm_Load);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel1.ResumeLayout(false);
