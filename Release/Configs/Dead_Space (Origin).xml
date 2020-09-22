@@ -1,0 +1,11 @@
+<Config>
+	<ProcessName>Dead Space</ProcessName>
+	<Position>
+		<Pointer>0x00B437B8, 0x0, 0xC0</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x00B437B8, 0x0, 0x100</SinAlpha>
+	<CosAlpha Inverted="False">0x00B437B8, 0x0, 0x108</CosAlpha>
+	<MoveXYAmount>5</MoveXYAmount>
+	<MoveZAmount>5</MoveZAmount>
+</Config>
