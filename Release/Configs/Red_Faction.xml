@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>RF_120na</ProcessName>
+	<Position>
+		<Pointer>0x001CB054, 0xE4</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>0</MoveXYAmount>
+	<MoveZAmount>3</MoveZAmount>
+</Config>
