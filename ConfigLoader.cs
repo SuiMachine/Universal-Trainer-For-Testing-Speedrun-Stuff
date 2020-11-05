@@ -11,6 +11,8 @@ namespace Flying47
 {
     static class GameConfigLoader
     {
+        private static string LastConfig = "";
+
         /// <summary>
         /// Reads pointers and addresses together with properties from Config file.
         /// </summary>
@@ -23,11 +25,11 @@ namespace Flying47
         /// <param name="MoveXYAmount">Outputed default move aount on X,Y axis. </param>
         /// <param name="MoveZAmount">Outputed default move amount on Z (height) axis.</param>
         /// <returns>Bool depending on whatever the read was sucessfull or not.</returns>
-        public static bool LoadFullConfig(out string ProcessName, out PositionSet_Pointer positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
+        public static bool LoadFullConfig(out string ProcessName, out PositionSet_Pointer positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount, bool forceDialogOpen = false)
         {
             string XML_FILE_NAME = "universal_trainer_for_testing.xml";
 
-            if (!File.Exists(XML_FILE_NAME))
+            if (!File.Exists(XML_FILE_NAME) || forceDialogOpen)
             {
                 OpenFileDialog fd = new OpenFileDialog
                 {
@@ -52,6 +54,12 @@ namespace Flying47
                 }
             }
 
+            LoadConfig(XML_FILE_NAME, out ProcessName, out positionSet, out sinAlpha, out sinInverted, out cosAlpha, out cosInverted, out MoveXYAmount, out MoveZAmount);
+            return true;
+        }
+
+        private static void LoadConfig(string XML_FILE_NAME, out string ProcessName, out PositionSet_Pointer positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
+		{
             XmlDocument doc = new XmlDocument();
             doc.Load(XML_FILE_NAME);
             XmlNode rootNode = doc["Config"];
@@ -59,7 +67,7 @@ namespace Flying47
             ProcessName = rootNode["ProcessName"].InnerText;
             positionSet = rootNode["Position"].ToPositionSet();
 
-            if(rootNode["SinAlpha"] != null || rootNode["CosAlpha"] != null)
+            if (rootNode["SinAlpha"] != null || rootNode["CosAlpha"] != null)
             {
                 sinAlpha = rootNode["SinAlpha"].ToPointer();
                 sinInverted = bool.Parse(rootNode["SinAlpha"].Attributes["Inverted"].InnerText);
@@ -81,7 +89,29 @@ namespace Flying47
 
             MoveXYAmount = float.Parse(rootNode["MoveXYAmount"].InnerText, frt);
             MoveZAmount = float.Parse(rootNode["MoveZAmount"].InnerText, frt);
-            return true;
+            LastConfig = XML_FILE_NAME;
+        }
+
+        internal static bool ReloadConfig(out string ProcessName, out PositionSet_Pointer positionSet, out Pointer sinAlpha, out bool sinInverted, out Pointer cosAlpha, out bool cosInverted, out float MoveXYAmount, out float MoveZAmount)
+        {
+            if(File.Exists(LastConfig))
+			{
+                LoadConfig(LastConfig, out ProcessName, out positionSet, out sinAlpha, out sinInverted, out cosAlpha, out cosInverted, out MoveXYAmount, out MoveZAmount);
+                return true;
+			}
+            else
+			{
+                MessageBox.Show("File you are trying to load seemes to have been deleted!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                ProcessName = "";
+                positionSet = new PositionSet_Pointer();
+                sinAlpha = null;
+                sinInverted = false;
+                cosAlpha = null;
+                cosInverted = false;
+                MoveXYAmount = 1;
+                MoveZAmount = 1;
+                return false;
+			}
         }
 
         /// <summary>
@@ -145,5 +175,5 @@ namespace Flying47
                 return Convert.ToInt32(text, 16);
             }
         }
-    }
+	}
 }

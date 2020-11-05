@@ -47,6 +47,17 @@ namespace Flying47
                         return false;
                 }
 
+                if(rootNode["Other"] != null)
+				{
+                    XmlNode otherNode = rootNode["Other"];
+
+                    if (otherNode["TopMost"] == null)
+                        return true;
+
+                    if (!bool.TryParse(otherNode["TopMost"].InnerText, out set.IsTopMost))
+                        return false;
+                }
+
                 return true;
             }
             else
@@ -67,6 +78,9 @@ namespace Flying47
                 XmlNode keys = doc.CreateElement("Keys");
                 rootNode.AppendChild(keys);
 
+                XmlNode other = doc.CreateElement("Other");
+                rootNode.AppendChild(other);
+
                 XmlNode kForwardNode = doc.CreateElement("Forward");
                 kForwardNode.InnerText = keysSet.Forward.ToString();
                 keys.AppendChild(kForwardNode);
@@ -86,6 +100,10 @@ namespace Flying47
                 XmlNode kLoadNode = doc.CreateElement("Load");
                 kLoadNode.InnerText = keysSet.LoadPosition.ToString();
                 keys.AppendChild(kLoadNode);
+
+                XmlNode oTopMost = doc.CreateElement("TopMost");
+                oTopMost.InnerText = keysSet.IsTopMost.ToString();
+                other.AppendChild(oTopMost);
 
                 doc.Save(CONFIG_FILE_NAME);
 

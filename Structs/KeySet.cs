@@ -15,6 +15,8 @@ namespace Flying47.Structs
         public Keys Down = Keys.None;
         public Keys Forward = Keys.None;
 
+        public bool IsTopMost = false;
+
         public KeySet()
         {
             this.StorePosition = Keys.NumPad7;
@@ -22,6 +24,7 @@ namespace Flying47.Structs
             this.Up = Keys.Add;
             this.Down = Keys.Subtract;
             this.Forward = Keys.NumPad8;
+            this.IsTopMost = false;
         }
     }
 }

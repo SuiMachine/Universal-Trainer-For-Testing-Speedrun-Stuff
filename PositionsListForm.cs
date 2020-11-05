@@ -93,14 +93,13 @@ namespace Flying47
             }
         }
 
-        private void positionGrid_CellLeave(object sender, DataGridViewCellEventArgs e)
+        private void PositionGrid_CellLeave(object sender, DataGridViewCellEventArgs e)
         {
             var column = e.ColumnIndex;
             if ((column == 1 || column == 2 || column == 3) && positionGrid.EditingControl != null)
             {
                 var validatedValue = positionGrid.EditingControl.Text;
-
-                if (!float.TryParse(validatedValue, out float parseTest))
+				if (!float.TryParse(validatedValue, out _))
                 {
                     MessageBox.Show("Failed to parse float value. Replacing with 0", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     positionGrid.EditingControl.Text = "0";
@@ -211,7 +210,7 @@ namespace Flying47
 
         }
 
-        private void positionGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
+        private void PositionGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             ContentChanged = true;
         }

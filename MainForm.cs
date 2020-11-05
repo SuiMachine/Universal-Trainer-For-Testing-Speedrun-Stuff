@@ -7,6 +7,7 @@ using System.Media;
 using MemoryReads64;
 using System.Linq;
 using System.IO;
+using Flying47.Structs;
 
 namespace Flying47
 {
@@ -68,7 +69,7 @@ namespace Flying47
                         KeysSet = LoadedSet;
                     else
                         KeysSet = new Structs.KeySet();
-
+                    
                     if(File.Exists(Path.Combine("Stored Lists", processName + ".xpos")))
                     {
                         DialogResult res = MessageBox.Show("Seems like there is a stored list of positions for current application, do you want to load it?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
@@ -100,12 +101,16 @@ namespace Flying47
 
                     TB_MoveXYAxis.Text = moveAmountXYAxis.ToString();
                     TB_MoveZAxis.Text = moveAmountZAxis.ToString();
+                    this.TopMost = KeysSet.IsTopMost;
+                    this.alwaysOnTopToolStripMenuItem.Checked = KeysSet.IsTopMost;
 
                     bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
                     gBuffer = Graphics.FromImage(bitmap);
-                    m_KeyboardHook = new KeyboardHook.KeyboardHook();
-                    m_KeyboardHook.KeysEnabled = true;
-                    RegisterKeys();
+					m_KeyboardHook = new KeyboardHook.KeyboardHook
+					{
+						KeysEnabled = true
+					};
+					RegisterKeys();
                     m_KeyboardHook.KeyPressed += GlobalHook_KeyDown;
                 }
                 else
@@ -381,13 +386,66 @@ namespace Flying47
                 MessageBox.Show("Done", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void B_OpenList_Click(object sender, EventArgs e)
-        {
+		private void TeleportListToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			bool tempOnTop = this.TopMost;
+            this.TopMost = false;
             m_KeyboardHook.KeysEnabled = false;
             PositionsListForm posForm = new PositionsListForm(this, ListOfStoredPositions);
             posForm.ShowDialog();
 
             m_KeyboardHook.KeysEnabled = true;
+            this.TopMost = tempOnTop;
         }
-    }
+
+		private void LoadOtherConfigToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+            if(GameConfigLoader.LoadFullConfig(out string processName, out PositionSet_Pointer positionAddress, out Pointer adrSinAlpha, out bool isSinInverted, out Pointer adrCosAlpha, out bool isCosInverted, out float moveAmountXYAxis, out float moveAmountZAxis, true))
+			{
+                this.processName = processName;
+                this.positionAddress = positionAddress;
+                this.adrSinAlpha = adrSinAlpha;
+                this.isSinInverted = isSinInverted;
+                this.adrCosAlpha = adrCosAlpha;
+                this.isCosInverted = isCosInverted;
+                this.moveAmountXYAxis = moveAmountXYAxis;
+                this.moveAmountZAxis = moveAmountZAxis;
+                TB_MoveXYAxis.Text = moveAmountXYAxis.ToString();
+                TB_MoveZAxis.Text = moveAmountZAxis.ToString();
+            }
+        }
+
+		private void AlwaysOnTopToolStripMenuItem_CheckedChanged(object sender, EventArgs e)
+		{
+            this.KeysSet.IsTopMost = this.alwaysOnTopToolStripMenuItem.Checked;
+            this.TopMost = this.alwaysOnTopToolStripMenuItem.Checked;
+        }
+
+		private void ReloadConfigToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+            if(GameConfigLoader.ReloadConfig(out string processName, out PositionSet_Pointer positionAddress, out Pointer adrSinAlpha, out bool isSinInverted, out Pointer adrCosAlpha, out bool isCosInverted, out float moveAmountXYAxis, out float moveAmountZAxis))
+			{
+                this.processName = processName;
+                this.positionAddress = positionAddress;
+                this.adrSinAlpha = adrSinAlpha;
+                this.isSinInverted = isSinInverted;
+                this.adrCosAlpha = adrCosAlpha;
+                this.isCosInverted = isCosInverted;
+                this.moveAmountXYAxis = moveAmountXYAxis;
+                this.moveAmountZAxis = moveAmountZAxis;
+                TB_MoveXYAxis.Text = moveAmountXYAxis.ToString();
+                TB_MoveZAxis.Text = moveAmountZAxis.ToString();
+            }
+		}
+
+		private void GithubRepositoryToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+            Process.Start("https://github.com/SuiMachine/Universal-Trainer-For-Testing-Speedrun-Stuff/tree/master/Release/Configs");
+        }
+
+		private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+            this.Close();
+		}
+	}
 }

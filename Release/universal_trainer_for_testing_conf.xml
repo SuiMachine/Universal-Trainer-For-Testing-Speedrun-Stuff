@@ -1,0 +1,12 @@
+<Config>
+  <Keys>
+    <Forward>NumPad8</Forward>
+    <Up>Add</Up>
+    <Down>Subtract</Down>
+    <Store>NumPad7</Store>
+    <Load>NumPad9</Load>
+  </Keys>
+  <Other>
+    <TopMost>True</TopMost>
+  </Other>
+</Config>
