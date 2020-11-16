@@ -150,7 +150,6 @@ namespace Flying47
                 this.Positions = positions;
                 this.parent.ListOfStoredPositions = positions;
                 ContentChanged = false;
-                MessageBox.Show("Done", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
