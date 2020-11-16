@@ -56,7 +56,6 @@ namespace Flying47
             positionGrid["Y", rowID].Value = parent.storedCoordinates.Y.ToString();
             positionGrid["Z", rowID].Value = parent.storedCoordinates.Z.ToString();
             ContentChanged = true;
-            MessageBox.Show("A new entry was added with a currently stored position", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void B_RemoveEntry_Click(object sender, EventArgs e)
