@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -207,12 +208,21 @@ namespace Flying47
                 var result = MessageBox.Show("All unsaved changes will be lost, do you want to close the window?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk);
                 e.Cancel = (result == DialogResult.No);
             }
-
         }
 
         private void PositionGrid_CellValueChanged(object sender, DataGridViewCellEventArgs e)
         {
             ContentChanged = true;
+        }
+
+		private void positionGrid_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+		{
+            parent.m_KeyboardHook.KeysEnabled = false;
+		}
+
+		private void positionGrid_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+		{
+            parent.m_KeyboardHook.KeysEnabled = true;
         }
     }
 }

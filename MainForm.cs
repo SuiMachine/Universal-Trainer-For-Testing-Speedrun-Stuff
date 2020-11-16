@@ -47,7 +47,7 @@ namespace Flying47
         Bitmap bitmap;
         Graphics gBuffer;
 
-        KeyboardHook.KeyboardHook m_KeyboardHook;
+        public KeyboardHook.KeyboardHook m_KeyboardHook;
 
 
         /*------------------
@@ -211,6 +211,8 @@ namespace Flying47
             L_Z.Text = "NaN";
         }
 
+        int il = 0;
+
         private void GlobalHook_KeyDown(object sender, KeyEventArgs e)
         {
             var hotkey = e.KeyCode;
@@ -222,6 +224,8 @@ namespace Flying47
                 if (hotkey == KeysSet.StorePosition)
                 {
                     Save_Position();
+                    Debug.WriteLine($"Save position {il}");
+                    il++;
                 }
                 else if (hotkey == KeysSet.LoadPosition)
                 {
@@ -390,11 +394,10 @@ namespace Flying47
 		{
 			bool tempOnTop = this.TopMost;
             this.TopMost = false;
-            m_KeyboardHook.KeysEnabled = false;
             PositionsListForm posForm = new PositionsListForm(this, ListOfStoredPositions);
             posForm.ShowDialog();
-
             m_KeyboardHook.KeysEnabled = true;
+
             this.TopMost = tempOnTop;
         }
 
