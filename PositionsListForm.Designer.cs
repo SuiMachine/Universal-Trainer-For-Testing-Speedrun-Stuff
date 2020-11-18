@@ -160,8 +160,8 @@
 			this.positionGrid.Name = "positionGrid";
 			this.positionGrid.Size = new System.Drawing.Size(674, 444);
 			this.positionGrid.TabIndex = 1;
-			this.positionGrid.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.positionGrid_CellBeginEdit);
-			this.positionGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.positionGrid_CellEndEdit);
+			this.positionGrid.CellBeginEdit += new System.Windows.Forms.DataGridViewCellCancelEventHandler(this.PositionGrid_CellBeginEdit);
+			this.positionGrid.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.PositionGrid_CellEndEdit);
 			this.positionGrid.CellLeave += new System.Windows.Forms.DataGridViewCellEventHandler(this.PositionGrid_CellLeave);
 			this.positionGrid.CellValueChanged += new System.Windows.Forms.DataGridViewCellEventHandler(this.PositionGrid_CellValueChanged);
 			// 

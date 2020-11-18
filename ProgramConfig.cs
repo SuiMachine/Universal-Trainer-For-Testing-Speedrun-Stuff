@@ -1,120 +1,116 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Flying47.Structs;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml;
-using Flying47.Structs;
 
 namespace Flying47
 {
-    public static class ProgramConfig
-    {
-        //Probably would be easier with serialization...
-        private const string CONFIG_FILE_NAME = "universal_trainer_for_testing_conf.xml";
+	public static class ProgramConfig
+	{
+		//Probably would be easier with serialization...
+		private const string CONFIG_FILE_NAME = "universal_trainer_for_testing_conf.xml";
 
-        public static bool LoadFullConfig(out KeySet set)
-        {
-            if (File.Exists(CONFIG_FILE_NAME))
-            {
-                XmlDocument doc = new XmlDocument();
-                doc.Load(CONFIG_FILE_NAME);
-                XmlNode rootNode = doc["Config"];
-                set = new KeySet();
+		public static bool LoadFullConfig(out KeySet set)
+		{
+			if (File.Exists(CONFIG_FILE_NAME))
+			{
+				XmlDocument doc = new XmlDocument();
+				doc.Load(CONFIG_FILE_NAME);
+				XmlNode rootNode = doc["Config"];
+				set = new KeySet();
 
-                if (rootNode["Keys"] != null)
-                {
-                    XmlNode keyNode = rootNode["Keys"];
-
-                    if (keyNode["Forward"] == null || keyNode["Up"] == null || keyNode["Down"] == null || keyNode["Store"] == null || keyNode["Load"] == null)
-                        return false;
-
-                    if (!Enum.TryParse<Keys>(keyNode["Forward"].InnerText, out set.Forward))
-                        return false;
-
-                    if (!Enum.TryParse<Keys>(keyNode["Up"].InnerText, out set.Up))
-                        return false;
-
-                    if (!Enum.TryParse<Keys>(keyNode["Down"].InnerText, out set.Down))
-                        return false;
-
-                    if (!Enum.TryParse<Keys>(keyNode["Store"].InnerText, out set.StorePosition))
-                        return false;
-
-                    if (!Enum.TryParse<Keys>(keyNode["Load"].InnerText, out set.LoadPosition))
-                        return false;
-                }
-
-                if(rootNode["Other"] != null)
+				if (rootNode["Keys"] != null)
 				{
-                    XmlNode otherNode = rootNode["Other"];
+					XmlNode keyNode = rootNode["Keys"];
 
-                    if (otherNode["TopMost"] == null)
-                        return true;
+					if (keyNode["Forward"] == null || keyNode["Up"] == null || keyNode["Down"] == null || keyNode["Store"] == null || keyNode["Load"] == null)
+						return false;
 
-                    if (!bool.TryParse(otherNode["TopMost"].InnerText, out set.IsTopMost))
-                        return false;
-                }
+					if (!Enum.TryParse<Keys>(keyNode["Forward"].InnerText, out set.Forward))
+						return false;
 
-                return true;
-            }
-            else
-            {
-                set = null;
-                return false;
-            }
-        }
+					if (!Enum.TryParse<Keys>(keyNode["Up"].InnerText, out set.Up))
+						return false;
 
-        internal static bool SaveConfig(KeySet keysSet)
-        {
-            try
-            {
-                XmlDocument doc = new XmlDocument();
-                XmlNode rootNode = doc.CreateElement("Config");
-                doc.AppendChild(rootNode);
+					if (!Enum.TryParse<Keys>(keyNode["Down"].InnerText, out set.Down))
+						return false;
 
-                XmlNode keys = doc.CreateElement("Keys");
-                rootNode.AppendChild(keys);
+					if (!Enum.TryParse<Keys>(keyNode["Store"].InnerText, out set.StorePosition))
+						return false;
 
-                XmlNode other = doc.CreateElement("Other");
-                rootNode.AppendChild(other);
+					if (!Enum.TryParse<Keys>(keyNode["Load"].InnerText, out set.LoadPosition))
+						return false;
+				}
 
-                XmlNode kForwardNode = doc.CreateElement("Forward");
-                kForwardNode.InnerText = keysSet.Forward.ToString();
-                keys.AppendChild(kForwardNode);
+				if (rootNode["Other"] != null)
+				{
+					XmlNode otherNode = rootNode["Other"];
 
-                XmlNode kUpNode = doc.CreateElement("Up");
-                kUpNode.InnerText = keysSet.Up.ToString();
-                keys.AppendChild(kUpNode);
+					if (otherNode["TopMost"] == null)
+						return true;
 
-                XmlNode kDownNode = doc.CreateElement("Down");
-                kDownNode.InnerText = keysSet.Down.ToString();
-                keys.AppendChild(kDownNode);
+					if (!bool.TryParse(otherNode["TopMost"].InnerText, out set.IsTopMost))
+						return false;
+				}
 
-                XmlNode kStoreNode = doc.CreateElement("Store");
-                kStoreNode.InnerText = keysSet.StorePosition.ToString();
-                keys.AppendChild(kStoreNode);
+				return true;
+			}
+			else
+			{
+				set = null;
+				return false;
+			}
+		}
 
-                XmlNode kLoadNode = doc.CreateElement("Load");
-                kLoadNode.InnerText = keysSet.LoadPosition.ToString();
-                keys.AppendChild(kLoadNode);
+		internal static bool SaveConfig(KeySet keysSet)
+		{
+			try
+			{
+				XmlDocument doc = new XmlDocument();
+				XmlNode rootNode = doc.CreateElement("Config");
+				doc.AppendChild(rootNode);
 
-                XmlNode oTopMost = doc.CreateElement("TopMost");
-                oTopMost.InnerText = keysSet.IsTopMost.ToString();
-                other.AppendChild(oTopMost);
+				XmlNode keys = doc.CreateElement("Keys");
+				rootNode.AppendChild(keys);
 
-                doc.Save(CONFIG_FILE_NAME);
+				XmlNode other = doc.CreateElement("Other");
+				rootNode.AppendChild(other);
 
-                return true;
-            }
-            catch(Exception e)
-            {
-                MessageBox.Show(e.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
+				XmlNode kForwardNode = doc.CreateElement("Forward");
+				kForwardNode.InnerText = keysSet.Forward.ToString();
+				keys.AppendChild(kForwardNode);
 
-        }
-    }
+				XmlNode kUpNode = doc.CreateElement("Up");
+				kUpNode.InnerText = keysSet.Up.ToString();
+				keys.AppendChild(kUpNode);
+
+				XmlNode kDownNode = doc.CreateElement("Down");
+				kDownNode.InnerText = keysSet.Down.ToString();
+				keys.AppendChild(kDownNode);
+
+				XmlNode kStoreNode = doc.CreateElement("Store");
+				kStoreNode.InnerText = keysSet.StorePosition.ToString();
+				keys.AppendChild(kStoreNode);
+
+				XmlNode kLoadNode = doc.CreateElement("Load");
+				kLoadNode.InnerText = keysSet.LoadPosition.ToString();
+				keys.AppendChild(kLoadNode);
+
+				XmlNode oTopMost = doc.CreateElement("TopMost");
+				oTopMost.InnerText = keysSet.IsTopMost.ToString();
+				other.AppendChild(oTopMost);
+
+				doc.Save(CONFIG_FILE_NAME);
+
+				return true;
+			}
+			catch (Exception e)
+			{
+				MessageBox.Show(e.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return false;
+			}
+
+		}
+	}
 }
