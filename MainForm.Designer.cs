@@ -307,7 +307,7 @@
 			this.tableLayoutPanel1.ColumnCount = 3;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 131F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 134F));
 			this.tableLayoutPanel1.Controls.Add(this.L_Z, 2, 1);
 			this.tableLayoutPanel1.Controls.Add(this.L_Y, 1, 1);
 			this.tableLayoutPanel1.Controls.Add(this.label5, 2, 0);
@@ -319,7 +319,7 @@
 			this.tableLayoutPanel1.RowCount = 2;
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(335, 63);
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(338, 63);
 			this.tableLayoutPanel1.TabIndex = 2;
 			// 
 			// L_Z
@@ -482,7 +482,7 @@
 			this.Name = "MainForm";
 			this.Text = "Universal Trainer for Speedrunners";
 			this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-			this.Load += new System.EventHandler(this.Form1_Load);
+			this.Shown += new System.EventHandler(this.MainForm_Shown);
 			this.InputPanel.ResumeLayout(false);
 			this.KeyPanel.ResumeLayout(false);
 			this.KeyPanel.PerformLayout();

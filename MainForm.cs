@@ -56,7 +56,7 @@ namespace Flying47
 			processName = "";
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
+		private void MainForm_Shown(object sender, EventArgs e)
 		{
 			try
 			{
@@ -69,7 +69,7 @@ namespace Flying47
 
 					if (File.Exists(Path.Combine("Stored Lists", processName + ".xpos")))
 					{
-						DialogResult res = MessageBox.Show("Seems like there is a stored list of positions for current application, do you want to load it?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+						DialogResult res = MessageBox.Show("Seems like there is a stored list of positions for current application, do you want to load it?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1);
 						if (res == DialogResult.Yes)
 						{
 							ListOfStoredPositions = Structs.PositionSets.Load(Path.Combine("Stored Lists", processName + ".xpos"));
@@ -119,6 +119,7 @@ namespace Flying47
 				Application.Exit();
 			}
 		}
+
 
 		private void RegisterKeys()
 		{
@@ -443,5 +444,6 @@ namespace Flying47
 		{
 			this.Close();
 		}
+
 	}
 }
