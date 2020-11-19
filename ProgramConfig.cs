@@ -9,14 +9,19 @@ namespace Flying47
 	public static class ProgramConfig
 	{
 		//Probably would be easier with serialization...
-		private const string CONFIG_FILE_NAME = "universal_trainer_for_testing_conf.xml";
+		public static string ActiveConfig { get; private set; }
 
 		public static bool LoadFullConfig(out KeySet set)
 		{
-			if (File.Exists(CONFIG_FILE_NAME))
+			string LOCAL_CONFIG_FILE_NAME = "universal_trainer_for_testing_conf.xml";
+			string CONFIG_FILE_NAME = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Universal_Trainer_FTST", LOCAL_CONFIG_FILE_NAME);
+
+			ActiveConfig = File.Exists(LOCAL_CONFIG_FILE_NAME) ? LOCAL_CONFIG_FILE_NAME : CONFIG_FILE_NAME;
+
+			if (File.Exists(ActiveConfig))
 			{
 				XmlDocument doc = new XmlDocument();
-				doc.Load(CONFIG_FILE_NAME);
+				doc.Load(ActiveConfig);
 				XmlNode rootNode = doc["Config"];
 				set = new KeySet();
 
@@ -101,8 +106,10 @@ namespace Flying47
 				oTopMost.InnerText = keysSet.IsTopMost.ToString();
 				other.AppendChild(oTopMost);
 
-				doc.Save(CONFIG_FILE_NAME);
-
+				var dir = Directory.GetParent(ActiveConfig).FullName;
+				if(!Directory.Exists(dir))
+					Directory.CreateDirectory(dir);
+				doc.Save(ActiveConfig);
 				return true;
 			}
 			catch (Exception e)

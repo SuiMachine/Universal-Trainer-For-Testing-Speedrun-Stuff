@@ -381,7 +381,7 @@ namespace Flying47
 		private void B_SaveProgramConfig_Click(object sender, EventArgs e)
 		{
 			if (ProgramConfig.SaveConfig(KeysSet))
-				MessageBox.Show("Done", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				MessageBox.Show($"Saved config in:\n{ProgramConfig.ActiveConfig}", "Notification", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		}
 
 		private void TeleportListToolStripMenuItem_Click(object sender, EventArgs e)
