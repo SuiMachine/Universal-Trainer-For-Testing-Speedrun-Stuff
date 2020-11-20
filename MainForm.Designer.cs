@@ -34,6 +34,7 @@
 			this.LB_Running = new System.Windows.Forms.Label();
 			this.InputPanel = new System.Windows.Forms.Panel();
 			this.KeyPanel = new System.Windows.Forms.Panel();
+			this.CB_CheckActiveWindow = new System.Windows.Forms.CheckBox();
 			this.B_SaveProgramConfig = new System.Windows.Forms.Button();
 			this.TB_MoveZAxis = new System.Windows.Forms.TextBox();
 			this.TB_MoveXYAxis = new System.Windows.Forms.TextBox();
@@ -97,13 +98,14 @@
 			this.InputPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
 			this.InputPanel.Controls.Add(this.KeyPanel);
 			this.InputPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.InputPanel.Location = new System.Drawing.Point(0, 143);
+			this.InputPanel.Location = new System.Drawing.Point(0, 144);
 			this.InputPanel.Name = "InputPanel";
-			this.InputPanel.Size = new System.Drawing.Size(391, 113);
+			this.InputPanel.Size = new System.Drawing.Size(391, 136);
 			this.InputPanel.TabIndex = 41;
 			// 
 			// KeyPanel
 			// 
+			this.KeyPanel.Controls.Add(this.CB_CheckActiveWindow);
 			this.KeyPanel.Controls.Add(this.B_SaveProgramConfig);
 			this.KeyPanel.Controls.Add(this.TB_MoveZAxis);
 			this.KeyPanel.Controls.Add(this.TB_MoveXYAxis);
@@ -120,8 +122,19 @@
 			this.KeyPanel.Controls.Add(this.label1);
 			this.KeyPanel.Location = new System.Drawing.Point(5, 8);
 			this.KeyPanel.Name = "KeyPanel";
-			this.KeyPanel.Size = new System.Drawing.Size(380, 97);
+			this.KeyPanel.Size = new System.Drawing.Size(380, 121);
 			this.KeyPanel.TabIndex = 41;
+			// 
+			// CB_CheckActiveWindow
+			// 
+			this.CB_CheckActiveWindow.AutoSize = true;
+			this.CB_CheckActiveWindow.Location = new System.Drawing.Point(7, 94);
+			this.CB_CheckActiveWindow.Name = "CB_CheckActiveWindow";
+			this.CB_CheckActiveWindow.Size = new System.Drawing.Size(239, 17);
+			this.CB_CheckActiveWindow.TabIndex = 61;
+			this.CB_CheckActiveWindow.Text = "Check if the active window is game\'s window";
+			this.CB_CheckActiveWindow.UseVisualStyleBackColor = true;
+			this.CB_CheckActiveWindow.CheckedChanged += new System.EventHandler(this.CB_CheckActiveWindow_CheckedChanged);
 			// 
 			// B_SaveProgramConfig
 			// 
@@ -278,7 +291,7 @@
 			this.panel1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.panel1.Location = new System.Drawing.Point(0, 48);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(391, 95);
+			this.panel1.Size = new System.Drawing.Size(391, 96);
 			this.panel1.TabIndex = 42;
 			// 
 			// label7
@@ -307,7 +320,7 @@
 			this.tableLayoutPanel1.ColumnCount = 3;
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
 			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 100F));
-			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 134F));
+			this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 136F));
 			this.tableLayoutPanel1.Controls.Add(this.L_Z, 2, 1);
 			this.tableLayoutPanel1.Controls.Add(this.L_Y, 1, 1);
 			this.tableLayoutPanel1.Controls.Add(this.label5, 2, 0);
@@ -319,7 +332,7 @@
 			this.tableLayoutPanel1.RowCount = 2;
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
 			this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 30F));
-			this.tableLayoutPanel1.Size = new System.Drawing.Size(338, 63);
+			this.tableLayoutPanel1.Size = new System.Drawing.Size(340, 63);
 			this.tableLayoutPanel1.TabIndex = 2;
 			// 
 			// L_Z
@@ -470,7 +483,7 @@
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(391, 256);
+			this.ClientSize = new System.Drawing.Size(391, 280);
 			this.Controls.Add(this.panel1);
 			this.Controls.Add(this.InputPanel);
 			this.Controls.Add(this.LB_Running);
@@ -538,6 +551,7 @@
 		private System.Windows.Forms.ToolStripMenuItem exitToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem githubRepositoryToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem teleportListToolStripMenuItem;
+		private System.Windows.Forms.CheckBox CB_CheckActiveWindow;
 	}
 }
 

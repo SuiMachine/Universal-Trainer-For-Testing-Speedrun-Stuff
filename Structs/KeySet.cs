@@ -11,6 +11,7 @@ namespace Flying47.Structs
 		public Keys Forward = Keys.None;
 
 		public bool IsTopMost = false;
+		public bool CheckActiveWindow = false;
 
 		public KeySet()
 		{
@@ -20,6 +21,7 @@ namespace Flying47.Structs
 			this.Down = Keys.Subtract;
 			this.Forward = Keys.NumPad8;
 			this.IsTopMost = false;
+			this.CheckActiveWindow = false;
 		}
 	}
 }

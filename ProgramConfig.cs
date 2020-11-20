@@ -52,10 +52,13 @@ namespace Flying47
 				{
 					XmlNode otherNode = rootNode["Other"];
 
-					if (otherNode["TopMost"] == null)
+					if (otherNode["TopMost"] == null || otherNode["CheckActiveWindow"] == null)
 						return true;
 
 					if (!bool.TryParse(otherNode["TopMost"].InnerText, out set.IsTopMost))
+						return false;
+
+					if (!bool.TryParse(otherNode["CheckActiveWindow"].InnerText, out set.CheckActiveWindow))
 						return false;
 				}
 
@@ -105,6 +108,11 @@ namespace Flying47
 				XmlNode oTopMost = doc.CreateElement("TopMost");
 				oTopMost.InnerText = keysSet.IsTopMost.ToString();
 				other.AppendChild(oTopMost);
+
+
+				XmlNode oActiveWindow = doc.CreateElement("CheckActiveWindow");
+				oActiveWindow.InnerText = keysSet.CheckActiveWindow.ToString();
+				other.AppendChild(oActiveWindow);
 
 				var dir = Directory.GetParent(ActiveConfig).FullName;
 				if(!Directory.Exists(dir))

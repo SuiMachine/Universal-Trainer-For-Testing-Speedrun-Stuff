@@ -100,6 +100,7 @@ namespace Flying47
 					TB_MoveZAxis.Text = moveAmountZAxis.ToString();
 					this.TopMost = KeysSet.IsTopMost;
 					this.alwaysOnTopToolStripMenuItem.Checked = KeysSet.IsTopMost;
+					this.CB_CheckActiveWindow.Checked = KeysSet.CheckActiveWindow;
 
 					bitmap = new Bitmap(vectorDisplay.Width, vectorDisplay.Height);
 					gBuffer = Graphics.FromImage(bitmap);
@@ -211,6 +212,26 @@ namespace Flying47
 
 		private void GlobalHook_KeyDown(object sender, KeyEventArgs e)
 		{
+			if (!foundProcess)
+				return;
+
+			if (KeysSet.CheckActiveWindow)
+			{
+				var activeWindow = ProcessExtansions.GetForegroundWindow();
+				if (activeWindow == null)
+					return;
+
+				try
+				{
+					if (ProcessExtansions.GetWindowThreadProcessId(activeWindow, out uint processID) != 0)
+					{
+						if (processID != myProcess.Id)
+							return;
+					}
+				}
+				catch (Exception) { }
+			}
+
 			var hotkey = e.KeyCode;
 			if (hotkey == Keys.None)
 				return;
@@ -445,5 +466,9 @@ namespace Flying47
 			this.Close();
 		}
 
+		private void CB_CheckActiveWindow_CheckedChanged(object sender, EventArgs e)
+		{
+			KeysSet.CheckActiveWindow = ((CheckBox)sender).Checked;
+		}
 	}
 }

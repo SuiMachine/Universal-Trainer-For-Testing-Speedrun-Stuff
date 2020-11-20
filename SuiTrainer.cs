@@ -648,6 +648,21 @@ namespace MemoryReads64
 				throw new Exception("Failed to check whatever process is 64bit!");
 		}
 
+		/// <summary>
+		/// Gets a handle for a window in foreground
+		/// </summary>
+		/// <returns>Handle of the window or null</returns>
+		[DllImport("user32.dll")]
+		public static extern IntPtr GetForegroundWindow();
+
+		/// <summary>
+		/// Gets a process ID from window handle
+		/// </summary>
+		/// <param name="hWnd">Handle of the window</param>
+		/// <param name="processId">Process that window belongs to</param>
+		/// <returns>Thread identifier ID</returns>
+		[DllImport("user32.dll", SetLastError = true)]
+		public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
 
 
 		[DllImport("psapi.dll", SetLastError = true)]
@@ -685,8 +700,7 @@ namespace MemoryReads64
 			var hModules = new IntPtr[1024];
 
 			uint cb = (uint)IntPtr.Size * (uint)hModules.Length;
-			uint cbNeeded;
-			if (!EnumProcessModulesEx(gameProcess.Handle, hModules, cb, out cbNeeded, LIST_MODULES_ALL))
+			if (!EnumProcessModulesEx(gameProcess.Handle, hModules, cb, out uint cbNeeded, LIST_MODULES_ALL))
 				throw new Win32Exception();
 			uint numMods = cbNeeded / (uint)IntPtr.Size;
 
