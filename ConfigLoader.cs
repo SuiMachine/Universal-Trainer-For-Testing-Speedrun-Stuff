@@ -163,14 +163,19 @@ namespace Flying47
 		{
 			if (text == "")
 				return 0;
-			else if (!text.StartsWith("0x"))
-			{
-				return int.Parse(text);
-			}
-			else
+			else if (text.StartsWith("0x"))
 			{
 				text = text.Substring(2, text.Length - 2);
 				return Convert.ToInt32(text, 16);
+			}
+			else if(text.StartsWith("-0x"))
+			{
+				text = text.Substring(3, text.Length - 3);
+				return Convert.ToInt32(text, 16) * -1;
+			}
+			else
+			{
+				return int.Parse(text);
 			}
 		}
 	}
