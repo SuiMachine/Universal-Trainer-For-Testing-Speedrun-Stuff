@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>conviction_game</ProcessName>
+	<Position>
+		<Pointer>0x00FCA9C0, 0x3C, 0x94</Pointer>
+		<XZY>true</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>0</MoveXYAmount>
+	<MoveZAmount>100</MoveZAmount>
+</Config>
