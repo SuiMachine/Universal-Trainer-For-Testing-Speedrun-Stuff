@@ -1,7 +1,7 @@
 <Config x64="false">
 	<ProcessName>Blacklist_game</ProcessName>
 	<Position>
-		<Pointer>0x02EB5DDC, 0x38, 0x9C</Pointer>
+		<Pointer>0x02EC6D48, 0xA4, 0x310, 0x9C</Pointer>
 		<XZY>false</XZY>
 	</Position>
 	<SinAlpha Inverted="False">0x0</SinAlpha>
