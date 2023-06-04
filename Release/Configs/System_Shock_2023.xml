@@ -1,0 +1,11 @@
+<Config  x64="true">
+	<ProcessName>SystemReShock-Win64-Shipping</ProcessName>
+	<Position>
+		<Pointer>0x0513AED0, 0x30, 0x250, 0x280, 0xC0, 0x1D0</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False">0x0</SinAlpha>
+	<CosAlpha Inverted="False">0x0</CosAlpha>
+	<MoveXYAmount>10</MoveXYAmount>
+	<MoveZAmount>50</MoveZAmount>
+</Config>
