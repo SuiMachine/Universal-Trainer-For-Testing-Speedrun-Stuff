@@ -6,6 +6,6 @@
 	</Position>
 	<SinAlpha Inverted="False">0x0</SinAlpha>
 	<CosAlpha Inverted="False">0x0</CosAlpha>
-	<MoveXYAmount>10</MoveXYAmount>
-	<MoveZAmount>50</MoveZAmount>
+	<MoveXYAmount>50</MoveXYAmount>
+	<MoveZAmount>100</MoveZAmount>
 </Config>
