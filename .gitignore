@@ -53,3 +53,4 @@ bin/
 *.zip
 
 .vs/*
+Release/universal_trainer_for_testing.xml
