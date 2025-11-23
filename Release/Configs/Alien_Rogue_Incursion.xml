@@ -3,8 +3,8 @@
 	<Position>
 		<Pointer>0x0A45C9A0, 0x60, 0x20, 0x200, 0x1F4</Pointer>
 		<XZY>false</XZY>
+		<ByteGap>8</ByteGap>
 	</Position>
-	<ByteGap>8</ByteGap>
 	<SinAlpha Inverted="False">0x0</SinAlpha>
 	<CosAlpha Inverted="False">0x0</CosAlpha>
 	<MoveXYAmount>2</MoveXYAmount>
