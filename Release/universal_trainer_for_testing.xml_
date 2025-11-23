@@ -1,0 +1,11 @@
+<Config x64="false">
+	<ProcessName>splintercell3</ProcessName>
+	<Position>
+		<Pointer>0x008FA4E8, 0xC8, 0x2B4, 0xE8</Pointer>
+		<XZY>false</XZY>
+	</Position>
+	<SinAlpha Inverted="False"></SinAlpha>
+	<CosAlpha Inverted="False"></CosAlpha>
+	<MoveXYAmount>5</MoveXYAmount>
+	<MoveZAmount>100</MoveZAmount>
+</Config>

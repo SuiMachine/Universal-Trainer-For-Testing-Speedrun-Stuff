@@ -20,7 +20,7 @@ namespace MemoryReads64
 		/// </summary>
 		public string BaseModuleName { get; private set; }
 		/// <summary>
-		/// First offset (this gets added to base module adress
+		/// First offset (this gets added to base module address
 		/// </summary>
 		public Int64 BaseOffset { get; private set; }
 		/// <summary>
@@ -32,7 +32,7 @@ namespace MemoryReads64
 		/// </summary>
 		public bool IsDirectPointer { get; private set; }
 		/// <summary>
-		/// Bool saying whatever the process is 64bit or not. This gets together with base module adress (and it has to be set correctly, in order for trainer class to treverse pointer offsets correctly).
+		/// Bool saying whatever the process is 64bit or not. This gets together with base module address (and it has to be set correctly, in order for trainer class to traverse pointer offsets correctly).
 		/// </summary>
 		public bool IsPtrFor64BitProcess { get; internal set; }
 
